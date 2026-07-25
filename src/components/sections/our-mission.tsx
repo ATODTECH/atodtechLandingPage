@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { Search } from "lucide-react";
 
-import { glowEllipse, missionPointing, missionRing } from "@/assets";
+import { AtodBrandLogo, glowEllipse, missionPointing, missionRing } from "@/assets";
 import { Reveal, RevealGroup, RevealItem } from "@/components/shared/reveal";
 import { SectionBadge } from "@/components/shared/section-badge";
 
@@ -38,11 +38,13 @@ export function OurMission() {
 						/>
 						<div className="grid items-end gap-8 lg:grid-cols-2">
 							<div className="flex flex-col gap-8 p-8 lg:p-12">
-								<div
-									role="img"
-									aria-label="Atod logo"
-									className="h-20 w-35 rounded-lg bg-neutral-300"
-								/>
+								<div className="w-fit self-start rounded-2xl bg-page px-6 py-2">
+									<AtodBrandLogo
+										aria-label="ATOD logo"
+										role="img"
+										className="h-24 w-auto"
+									/>
+								</div>
 								<p className="max-w-100 text-lg leading-normal text-brand">
 									We don&rsquo;t just build software we build lasting
 									partnerships. Whether you&rsquo;re a startup or an established

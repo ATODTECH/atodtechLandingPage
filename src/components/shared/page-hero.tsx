@@ -8,6 +8,7 @@ type PageHeroProps = {
 	description: string;
 	action?: { label: string; href: string };
 	contentClassName?: string;
+	titleClassName?: string;
 	children?: React.ReactNode;
 };
 
@@ -16,6 +17,7 @@ export function PageHero({
 	description,
 	action,
 	contentClassName,
+	titleClassName,
 	children,
 }: PageHeroProps) {
 	return (
@@ -31,7 +33,12 @@ export function PageHero({
 				)}
 			>
 				<RevealItem>
-					<h1 className="heading-gradient max-w-290.5 text-center text-[40px] font-medium leading-tight tracking-[-1.44px] sm:text-[56px] lg:text-[72px] lg:leading-22.25">
+					<h1
+						className={cn(
+							"heading-gradient max-w-290.5 text-center text-[40px] font-medium leading-tight tracking-[-1.44px] sm:text-[56px] lg:text-[72px] lg:leading-22.25",
+							titleClassName,
+						)}
+					>
 						{title}
 					</h1>
 				</RevealItem>

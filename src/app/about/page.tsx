@@ -22,6 +22,7 @@ export default function AboutPage() {
 				title="Discover Our Mission And Values In Digital Product Building"
 				description="We design and develop websites, mobile apps, and software that bring your ideas to life."
 				action={{ label: "Contact Us", href: "/contact" }}
+				titleClassName="lg:text-[64px] lg:leading-[79px]"
 			/>
 			<WhoWeAre />
 			<OurMission />

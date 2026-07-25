@@ -23,6 +23,7 @@ export { default as logoLightbox } from "./images/logo-lightbox.svg";
 export { default as logoFeatherDev } from "./images/logo-featherdev.svg";
 export { default as logoGlobalBank } from "./images/logo-globalbank.svg";
 
+export { default as AtodBrandLogo } from "./icons/AtodBrandLogo";
 export { default as sparklePlus } from "./icons/sparkle-plus.svg";
 export { default as checkCircle } from "./icons/check-circle.svg";
 export { default as sparkleSquare } from "./icons/sparkle-square.svg";

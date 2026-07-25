@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu } from "lucide-react";
 
+import { AtodBrandLogo } from "@/assets";
 import { FancyButton } from "@/components/shared/fancy-button";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,13 +28,15 @@ export function Header() {
 
 	return (
 		<header className="absolute inset-x-0 top-0 z-30">
-			<div className="mx-auto flex h-20 w-full max-w-360 items-center justify-between px-6 xl:px-30">
+			<div className="mx-auto flex h-24 w-full max-w-360 items-center justify-between px-6 xl:px-30">
 				<div className="flex items-center gap-10">
 					<Link
 						href="/"
 						aria-label="ATOD Tech Agency - Home"
-						className="block h-8 w-31 cursor-pointer bg-transparent"
-					/>
+						className="block cursor-pointer"
+					>
+						<AtodBrandLogo aria-hidden className="h-20 w-auto" />
+					</Link>
 					<nav className="hidden items-center gap-8 lg:flex">
 						{navLinks.map((link) => (
 							<Link

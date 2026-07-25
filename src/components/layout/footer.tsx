@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import {
+	AtodBrandLogo,
 	socialFacebook,
 	socialInstagram,
 	socialLinkedin,
@@ -59,8 +60,10 @@ export function Footer() {
 						<Link
 							href="/"
 							aria-label="ATOD Tech Agency - Home"
-							className="block h-8 w-31 cursor-pointer bg-transparent"
-						/>
+							className="block cursor-pointer"
+						>
+							<AtodBrandLogo aria-hidden className="h-20 w-auto" />
+						</Link>
 						<p className="mt-6 max-w-80.75 text-base leading-6 text-white">
 							We design and build digital products that empower businesses to
 							grow.
