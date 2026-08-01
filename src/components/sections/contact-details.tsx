@@ -51,7 +51,7 @@ const formFields: Array<{
 	{
 		id: "projectType",
 		label: "Project Type",
-		placeholder: "Company",
+		placeholder: "e.g. Web Development",
 		type: "text",
 	},
 ];
@@ -143,8 +143,8 @@ export function ContactDetails() {
 					<ContactMethod
 						icon={Mail}
 						label="Email:"
-						value="atodtech100@gmail.com"
-						href="mailto:atodtech100@gmail.com"
+						value="atodtech200@gmail.com"
+						href="mailto:atodtech200@gmail.com"
 					/>
 					<hr className="border-white" />
 					<ContactMethod

@@ -5,8 +5,12 @@ import * as yup from "yup";
 import { renderContactEmail } from "@/lib/email/contact-email";
 import { ContactUsSchema } from "@/lib/validation-schemas";
 
-const CONTACT_RECIPIENT = "tolajinadu1123@gmail.com";
-const FROM_ADDRESS = "Atod Contact Form <onboarding@resend.dev>";
+const CONTACT_RECIPIENTS = [
+	// "info@atodtech.com",
+	"tolajinadu1123@gmail.com",
+	"atodtech200@gmail.com",
+];
+const FROM_ADDRESS = "Atod Contact Form <noreply@atodtech.com>";
 
 export async function POST(request: Request) {
 	let body: unknown;
@@ -14,12 +18,18 @@ export async function POST(request: Request) {
 	try {
 		body = await request.json();
 	} catch {
-		return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+		return NextResponse.json(
+			{ error: "Invalid request body" },
+			{ status: 400 },
+		);
 	}
 
 	let values;
 	try {
-		values = await ContactUsSchema.validate(body, { abortEarly: false, stripUnknown: true });
+		values = await ContactUsSchema.validate(body, {
+			abortEarly: false,
+			stripUnknown: true,
+		});
 	} catch (error) {
 		if (error instanceof yup.ValidationError) {
 			return NextResponse.json(
@@ -48,7 +58,7 @@ export async function POST(request: Request) {
 
 	const { error } = await resend.emails.send({
 		from: FROM_ADDRESS,
-		to: CONTACT_RECIPIENT,
+		to: CONTACT_RECIPIENTS,
 		replyTo: email,
 		subject: `New project inquiry from ${name}`,
 		html: renderContactEmail({ name, email, phone, projectType, message }),
