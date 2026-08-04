@@ -126,15 +126,23 @@ export function Hero() {
 				<RevealItem>
 					<Link
 						href="#projects"
-						className="fancy-shadow flex cursor-pointer flex-wrap items-center justify-center gap-y-1 rounded-[50px] py-1 pl-2 pr-4 transition-[filter] hover:brightness-125"
+						className="fancy-shadow flex w-fit max-w-full cursor-pointer items-center justify-center rounded-[50px] py-1 pl-1.5 pr-2.5 transition-[filter] hover:brightness-125 sm:pl-2 sm:pr-4"
 					>
-						<span className="fancy-gradient rounded-[50px] border border-white px-3.5 py-0.5 text-sm leading-5 tracking-[0.56px] text-badge-text">
+						<span className="fancy-gradient shrink-0 rounded-[50px] border border-white px-2.5 py-0.5 text-xs leading-5 tracking-[0.4px] text-badge-text sm:px-3.5 sm:text-sm sm:tracking-[0.56px]">
 							New Projects
 						</span>
-						<span className="px-2 text-sm leading-5 tracking-[0.56px] text-white">
-							Check out our new products
+						<span className="min-w-0 truncate px-1.5 text-xs leading-5 tracking-[0.4px] text-white sm:px-2 sm:text-sm sm:tracking-[0.56px]">
+							<span className="sm:hidden">
+								See our new products
+							</span>
+							<span className="hidden sm:inline">
+								Check out our new products
+							</span>
 						</span>
-						<ArrowRight className="size-4 text-white" aria-hidden />
+						<ArrowRight
+							className="size-3.5 shrink-0 text-white sm:size-4"
+							aria-hidden
+						/>
 					</Link>
 				</RevealItem>
 
@@ -146,8 +154,8 @@ export function Hero() {
 
 				<RevealItem>
 					<p className="mt-4 max-w-161.25 text-center text-lg leading-7.5 text-white lg:text-xl">
-						We design and develop websites, mobile apps, and custom software
-						that bring your ideas to life.
+						We design and develop websites, mobile apps, and custom
+						software that bring your ideas to life.
 					</p>
 				</RevealItem>
 
@@ -159,7 +167,8 @@ export function Hero() {
 
 				<RevealItem className="mt-10 flex flex-col items-center gap-4">
 					<p className="text-center text-sm leading-5 tracking-[0.56px] text-[#eaeaea] sm:bg-linear-to-b sm:from-[#eaeaea] sm:to-[#eaeaea]/0 sm:bg-clip-text sm:text-transparent">
-						Trusted by startups, enterprises, and innovators worldwide.
+						Trusted by startups, enterprises, and innovators
+						worldwide.
 					</p>
 					<div className="flex flex-wrap items-center justify-center gap-8">
 						{trustedLogos.map((logo) => (
@@ -226,7 +235,11 @@ export function Hero() {
 
 				<RevealItem className="mt-8 flex flex-wrap items-center justify-center gap-2 min-[1200px]:hidden">
 					{flowSteps.map((step) => (
-						<FlowChip key={step.label} icon={step.icon} label={step.label} />
+						<FlowChip
+							key={step.label}
+							icon={step.icon}
+							label={step.label}
+						/>
 					))}
 					{flowMilestones.map((m) => (
 						<FlowMilestone key={m.label} label={m.label} />

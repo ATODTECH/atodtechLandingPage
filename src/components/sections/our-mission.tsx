@@ -1,7 +1,12 @@
 import Image from "next/image";
 import { Search } from "lucide-react";
 
-import { AtodBrandLogo, glowEllipse, missionPointing, missionRing } from "@/assets";
+import {
+	AtodBrandLogo,
+	glowEllipse,
+	missionPointing,
+	missionRing,
+} from "@/assets";
 import { Reveal, RevealGroup, RevealItem } from "@/components/shared/reveal";
 import { SectionBadge } from "@/components/shared/section-badge";
 
@@ -22,8 +27,9 @@ export function OurMission() {
 					</RevealItem>
 					<RevealItem>
 						<p className="max-w-247 text-xl leading-relaxed text-white lg:text-2xl">
-							We&rsquo;re a team of designers, developers, and innovators
-							passionate about turning ideas into impactful digital products.
+							We&rsquo;re a team of designers, developers, and
+							innovators passionate about turning ideas into
+							impactful digital products.
 						</p>
 					</RevealItem>
 				</RevealGroup>
@@ -36,19 +42,20 @@ export function OurMission() {
 							aria-hidden
 							className="pointer-events-none absolute right-0 top-1/2 hidden w-36 -translate-y-1/2 lg:block"
 						/>
-						<div className="grid items-end gap-8 lg:grid-cols-2">
-							<div className="flex flex-col gap-8 p-8 lg:p-12">
-								<div className="w-fit self-start rounded-2xl bg-page px-6 py-2">
+						<div className="grid items-end gap-0 md:gap-8 lg:grid-cols-2">
+							<div className="flex flex-col gap-8 p-6 md:p-8 lg:p-12">
+								<div className="w-fit self-start rounded-2xl bg-page px-4 md:px-6 py-2">
 									<AtodBrandLogo
 										aria-label="ATOD logo"
 										role="img"
-										className="h-24 w-auto"
+										className="h-14 md:h-24 w-auto"
 									/>
 								</div>
 								<p className="max-w-100 text-lg leading-normal text-brand">
-									We don&rsquo;t just build software we build lasting
-									partnerships. Whether you&rsquo;re a startup or an established
-									brand, we&rsquo;re here to help you grow, one digital product
+									We don&rsquo;t just build software we build
+									lasting partnerships. Whether you&rsquo;re a
+									startup or an established brand, we&rsquo;re
+									here to help you grow, one digital product
 									at a time.
 								</p>
 							</div>

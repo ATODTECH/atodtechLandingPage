@@ -114,7 +114,9 @@ export function ContactDetails() {
 					throw new Error(data.error || "Failed to send message");
 				}
 
-				toast.success("Message sent successfully! We'll get back to you soon.");
+				toast.success(
+					"Message sent successfully! We'll get back to you soon.",
+				);
 				resetForm();
 			} catch (error) {
 				console.error("Error:", error);
@@ -176,7 +178,7 @@ export function ContactDetails() {
 				<form
 					noValidate
 					onSubmit={formik.handleSubmit}
-					className="flex w-full flex-col gap-6 rounded-md border border-white/10 bg-transparent p-0 md:p-8"
+					className="flex w-full flex-col gap-6 rounded-md md:border border-white/10 bg-transparent p-0 md:p-8"
 				>
 					<input
 						type="text"
@@ -204,7 +206,9 @@ export function ContactDetails() {
 								onBlur={formik.handleBlur}
 								disabled={formik.isSubmitting}
 								error={
-									formik.touched[field.id] ? formik.errors[field.id] : undefined
+									formik.touched[field.id]
+										? formik.errors[field.id]
+										: undefined
 								}
 							/>
 						))}
@@ -219,7 +223,11 @@ export function ContactDetails() {
 						onChange={formik.handleChange}
 						onBlur={formik.handleBlur}
 						disabled={formik.isSubmitting}
-						error={formik.touched.message ? formik.errors.message : undefined}
+						error={
+							formik.touched.message
+								? formik.errors.message
+								: undefined
+						}
 					/>
 
 					<LoadingButton
