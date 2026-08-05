@@ -17,22 +17,16 @@ const squareSlots = {
 } as const;
 
 type ServiceCardProps = {
-	title: string;
 	description: string;
 	squares: Record<keyof typeof squareSlots, SquareColor>;
 	className?: string;
 };
 
-function ServiceCard({
-	title,
-	description,
-	squares,
-	className,
-}: ServiceCardProps) {
+function ServiceCard({ description, squares, className }: ServiceCardProps) {
 	return (
 		<div
 			className={cn(
-				"relative h-[353px] overflow-hidden rounded-[18px] bg-white",
+				"relative min-h-[280px] overflow-hidden rounded-[18px] bg-white sm:h-[353px]",
 				className,
 			)}
 		>
@@ -55,23 +49,16 @@ function ServiceCard({
 					/>
 				),
 			)}
-			<div className="absolute inset-x-7 bottom-[27px] flex flex-col gap-[5px] text-black">
-				<h3 className="text-lg font-semibold leading-[1.2]">{title}</h3>
-				<p className="text-base leading-[1.38]">{description}</p>
-			</div>
+			<p className="absolute inset-x-5 bottom-8 text-base leading-[22px] text-black">
+				{description}
+			</p>
 		</div>
 	);
 }
 
-function GhostCard({
-	title,
-	description,
-}: {
-	title: string;
-	description: string;
-}) {
+function GhostCard({ description }: { description: string }) {
 	return (
-		<div className="relative h-[212px] overflow-hidden rounded-[18px]">
+		<div className="relative min-h-[180px] overflow-hidden rounded-[18px] sm:h-[212px]">
 			<Image
 				src={sparkleSquare}
 				alt=""
@@ -84,10 +71,9 @@ function GhostCard({
 				aria-hidden
 				className="absolute bottom-[24px] right-7 size-6"
 			/>
-			<div className="absolute inset-x-7 bottom-[27px] flex max-w-[226px] flex-col gap-[5px] text-white">
-				<h3 className="text-lg font-semibold leading-[1.38]">{title}</h3>
-				<p className="text-base leading-[1.38]">{description}</p>
-			</div>
+			<p className="absolute inset-x-5 bottom-8 max-w-[310px] text-base leading-[22px] text-white">
+				{description}
+			</p>
 		</div>
 	);
 }
@@ -104,14 +90,16 @@ export function Services() {
 			/>
 
 			<div className="relative mx-auto w-full max-w-[1440px] px-6 pb-16 md:pb-20 pt-10 md:pt-20 xl:px-[120px]">
-				<RevealGroup className="flex max-w-[873px] flex-col items-start gap-6">
+				<RevealGroup className="flex max-w-[1030px] flex-col items-start gap-6">
 					<RevealItem>
-						<SectionBadge icon={UserRoundSearch}>What We Do</SectionBadge>
+						<SectionBadge icon={UserRoundSearch}>
+							We Do More Than Write Code
+						</SectionBadge>
 					</RevealItem>
 					<RevealItem>
 						<SectionHeading>
-							From strategy to design and development, we help you create
-							digital products that scale.
+							A successful digital product begins with a clear understanding of
+							the problem it must solve.
 						</SectionHeading>
 					</RevealItem>
 				</RevealGroup>
@@ -122,26 +110,20 @@ export function Services() {
 				>
 					<RevealItem>
 						<ServiceCard
-							title="Website Design & Development"
-							description="Fast, responsive, and user-focused."
+							description="ATOD combines product strategy, business analysis, product design, engineering, documentation, and automation."
 							squares={{ left: "blue", right: "orange", top: "orange" }}
 						/>
 					</RevealItem>
 					<RevealItem className="grid gap-4">
-						<GhostCard
-							title="Mobile Apps"
-							description="iOS & Android apps built for performance."
-						/>
+						<GhostCard description="Seamless, intuitive, and delightful user experiences." />
 						<ServiceCard
-							title="UI/UX Design"
-							description="Seamless, intuitive, and delightful user experiences."
+							description="We do post-launch support to create useful systems, not just impressive screens."
 							squares={{ left: "orange", right: "orange", top: "blue" }}
 						/>
 					</RevealItem>
 					<RevealItem>
 						<ServiceCard
-							title="Customer Software Solution"
-							description="Tailored system for business needs."
+							description="Whether you have a complete specification, a sketch, a spoken idea, or an existing system that needs improvement, we can help you move forward with structure and confidence."
 							squares={{ left: "orange", right: "blue", top: "orange" }}
 						/>
 					</RevealItem>

@@ -1,7 +1,7 @@
 import Image from "next/image";
-import { FolderOpen } from "lucide-react";
+import { ExternalLink, FolderOpen } from "lucide-react";
 
-import { phoneMockup1, phoneMockup2, phoneMockup3 } from "@/assets";
+import { featuredKiddiedu } from "@/assets";
 import { FancyButton } from "@/components/shared/fancy-button";
 import { Reveal, RevealGroup, RevealItem } from "@/components/shared/reveal";
 import { SectionBadge } from "@/components/shared/section-badge";
@@ -11,48 +11,48 @@ export function FeaturedProjects() {
 	return (
 		<section id="projects" className="relative">
 			<div className="mx-auto flex w-full max-w-[1440px] flex-col items-center px-6 py-10 md:py-20 xl:px-[120px]">
-				<RevealGroup className="flex max-w-[694px] flex-col items-center gap-6 text-center">
+				<RevealGroup className="flex max-w-[1151px] flex-col items-center gap-6 text-center">
 					<RevealItem>
 						<SectionBadge icon={FolderOpen}>Featured Project</SectionBadge>
 					</RevealItem>
+					<RevealItem className="flex flex-col gap-3">
+						<SectionHeading>Kiddiedu</SectionHeading>
+						<p className="text-xl leading-[29px] text-brand-accent lg:text-2xl">
+							Education Technology Platform
+						</p>
+					</RevealItem>
 					<RevealItem>
-						<SectionHeading>
-							Take a look at some of the projects we&rsquo;ve brought to life for
-							our clients.
-						</SectionHeading>
+						<p className="text-base leading-[26px] text-white/70">
+							Kiddiedu demonstrates ATOD&rsquo;s ability to transform an idea
+							into a practical education technology product. The project
+							reflects experience in product planning, educational workflows,
+							information management, user-centered design, mobile and web
+							development, parent-teacher-student engagement, and institution
+							documentation, deployment, and continuous improvement.
+						</p>
 					</RevealItem>
 				</RevealGroup>
 
-				<RevealGroup
-					stagger={0.12}
-					className="mt-[42px] flex items-start justify-center gap-3 sm:gap-[21px]"
-				>
-					<RevealItem className="mt-6 hidden sm:block lg:mt-[47px]">
+				<Reveal className="mt-10 w-full md:mt-14" amount={0.15}>
+					<div className="-mx-6 overflow-x-auto px-6 md:mx-0 md:overflow-visible md:px-0">
 						<Image
-							src={phoneMockup1}
-							alt="Artisan app - categories screen"
-							className="w-[220px] lg:w-[314px]"
+							src={featuredKiddiedu}
+							alt="Kiddiedu dashboards, class booking screens, and mobile app views"
+							className="w-180 min-w-180 max-w-none rounded-xl md:w-full md:min-w-0"
 						/>
-					</RevealItem>
-					<RevealItem>
-						<Image
-							src={phoneMockup2}
-							alt="Artisan app - home screen"
-							className="w-[240px] lg:w-[314px]"
-						/>
-					</RevealItem>
-					<RevealItem className="mt-6 hidden md:block lg:mt-[47px]">
-						<Image
-							src={phoneMockup3}
-							alt="Artisan app - artisan profile screen"
-							className="w-[220px] lg:w-[314px]"
-						/>
-					</RevealItem>
-				</RevealGroup>
+					</div>
+				</Reveal>
 
 				<Reveal>
-					<FancyButton href="#" className="mt-[42px]">
-						View Projects
+					<FancyButton
+						href="#"
+						icon={null}
+						className="mt-10 md:mt-14"
+					>
+						<span className="inline-flex items-center gap-2">
+							View Live Product
+							<ExternalLink className="size-4" aria-hidden />
+						</span>
 					</FancyButton>
 				</Reveal>
 			</div>

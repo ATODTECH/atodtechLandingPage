@@ -12,6 +12,7 @@ export { default as visionIllustration } from "./images/vision-illustration.png"
 export { default as projectSabiwork } from "./images/card_1.png";
 export { default as projectCyberdependency } from "./images/card_2.png";
 export { default as projectPickup } from "./images/card_3.png";
+export { default as featuredKiddiedu } from "./images/featured.svg";
 export { default as gridCard } from "./images/grid-card.png";
 export { default as gridBlue } from "./images/grid-blue.png";
 export { default as glowEllipse } from "./images/glow-ellipse.svg";

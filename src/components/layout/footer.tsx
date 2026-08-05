@@ -15,30 +15,30 @@ const footerColumns = [
 		heading: "Links",
 		links: [
 			{ label: "Home", href: "/" },
+			{ label: "Our Services", href: "/services" },
 			{ label: "Projects", href: "/projects" },
 			{ label: "About Us", href: "/about" },
-			{ label: "Contact", href: "/contact" },
-			{ label: "Privacy policy", href: "#" },
+			{ label: "FAQs", href: "/faqs" },
 		],
 	},
 	{
 		heading: "Services",
 		links: [
-			{ label: "Web design", href: "#" },
-			{ label: "Web development", href: "#" },
-			{ label: "Mobile design", href: "#" },
-			{ label: "UI/UX design", href: "#" },
-			{ label: "Branding design", href: "#" },
+			{ label: "Web design", href: "/services" },
+			{ label: "Web development", href: "/services" },
+			{ label: "Mobile design", href: "/services" },
+			{ label: "UI/UX design", href: "/services" },
+			{ label: "Branding design", href: "/services" },
 		],
 	},
 	{
-		heading: "Contact us",
+		heading: "Contact Us",
 		links: [
-			{ label: "Information", href: "/contact" },
-			{ label: "Request a quote", href: "/contact" },
-			{ label: "Consultation", href: "/contact" },
-			{ label: "Help center", href: "#" },
-			{ label: "Terms and conditions", href: "#" },
+			{ label: "info@atodtech.com", href: "mailto:info@atodtech.com" },
+			{ label: "admin@atodtech.com", href: "mailto:admin@atodtech.com" },
+			{ label: "+234 906 052 6791", href: "tel:+2349060526791" },
+			{ label: "Request a Consultation", href: "/contact" },
+			{ label: "Contact Us", href: "/contact" },
 		],
 	},
 ];
@@ -64,9 +64,10 @@ export function Footer() {
 						>
 							<AtodBrandLogo aria-hidden className="h-20 w-auto" />
 						</Link>
-						<p className="mt-6 max-w-80.75 text-base leading-6 text-white">
-							We design and build digital products that empower businesses to
-							grow.
+						<p className="mt-6 max-w-92.75 text-base leading-6 text-white">
+							ATOD builds custom software, mobile applications, web platforms
+							and AI automation solutions for organisations in the United
+							States, Nigeria and beyond.
 						</p>
 						<div className="mt-8 flex items-start gap-4">
 							{socialIcons.map((icon) => (
@@ -88,16 +89,25 @@ export function Footer() {
 								{column.heading}
 							</h3>
 							<ul className="flex flex-col gap-6">
-								{column.links.map((link) => (
-									<li key={link.label}>
-										<Link
-											href={link.href}
-											className="cursor-pointer text-base leading-5.5 text-white transition-colors hover:text-brand-accent"
-										>
-											{link.label}
-										</Link>
-									</li>
-								))}
+								{column.links.map((link) => {
+									const className =
+										"cursor-pointer break-all text-base leading-5.5 text-white transition-colors hover:text-brand-accent";
+									const isDirect = /^(mailto|tel):/.test(link.href);
+
+									return (
+										<li key={link.label}>
+											{isDirect ? (
+												<a href={link.href} className={className}>
+													{link.label}
+												</a>
+											) : (
+												<Link href={link.href} className={className}>
+													{link.label}
+												</Link>
+											)}
+										</li>
+									);
+								})}
 							</ul>
 						</div>
 					))}
@@ -105,7 +115,7 @@ export function Footer() {
 
 				<div className="mt-12 flex h-15 items-center justify-center border-t border-[#e1e4ed]/40 py-12 md:py-6">
 					<p className="text-center text-sm leading-5.5 text-white/90 lg:text-base">
-						Copyright &copy; 2025 ATOD Tech Agency{" "}
+						Copyright &copy; 2026 ATOD Tech Agency{" "}
 						<span className="text-[#d3d7e5]">|</span> All Rights Reserved{" "}
 						<span className="text-[#d3d7e5]">|</span>{" "}
 						<a href="#" className="cursor-pointer underline hover:text-white">
