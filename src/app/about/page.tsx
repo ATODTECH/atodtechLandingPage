@@ -23,6 +23,7 @@ export default function AboutPage() {
 				description="We design and develop websites, mobile apps, and software that bring your ideas to life."
 				action={{ label: "Contact Us", href: "/contact" }}
 				titleClassName="lg:text-[64px] lg:leading-[79px]"
+				contentClassName="pt-40 pb-24 md:pb-24 lg:pt-69.25 lg:pb-65.25"
 			/>
 			<WhoWeAre />
 			<OurMission />

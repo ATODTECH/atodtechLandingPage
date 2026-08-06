@@ -20,6 +20,7 @@ export default function ServicesPage() {
 			<PageHero
 				title="Our Services"
 				description="ATOD designs and develops custom software, mobile applications, AI-powered automation, websites, and information systems for startups, businesses, institutions, and public-sector organizations."
+				contentClassName="pt-40 pb-24 md:pb-24 lg:pt-46 lg:pb-36.5"
 				badge={
 					<SplitBadge label="CAPABILITIES">
 						Comprehensive Digital Agency Services
