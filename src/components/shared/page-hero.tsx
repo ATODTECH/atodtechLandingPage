@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 type PageHeroProps = {
 	title: string;
 	description: string;
+	badge?: React.ReactNode;
 	action?: { label: string; href: string };
 	contentClassName?: string;
 	titleClassName?: string;
@@ -15,6 +16,7 @@ type PageHeroProps = {
 export function PageHero({
 	title,
 	description,
+	badge,
 	action,
 	contentClassName,
 	titleClassName,
@@ -32,6 +34,7 @@ export function PageHero({
 					contentClassName,
 				)}
 			>
+				{badge && <RevealItem className="mb-6">{badge}</RevealItem>}
 				<RevealItem>
 					<h1
 						className={cn(

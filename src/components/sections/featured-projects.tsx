@@ -1,7 +1,7 @@
 import Image from "next/image";
-import { ExternalLink, FolderOpen } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 
-import { featuredKiddiedu } from "@/assets";
+import { featuredKiddiedu, iconFeaturedProject } from "@/assets";
 import { FancyButton } from "@/components/shared/fancy-button";
 import { Reveal, RevealGroup, RevealItem } from "@/components/shared/reveal";
 import { SectionBadge } from "@/components/shared/section-badge";
@@ -13,7 +13,7 @@ export function FeaturedProjects() {
 			<div className="mx-auto flex w-full max-w-[1440px] flex-col items-center px-6 py-10 md:py-20 xl:px-[120px]">
 				<RevealGroup className="flex max-w-[1151px] flex-col items-center gap-6 text-center">
 					<RevealItem>
-						<SectionBadge icon={FolderOpen}>Featured Project</SectionBadge>
+						<SectionBadge icon={iconFeaturedProject}>Featured Project</SectionBadge>
 					</RevealItem>
 					<RevealItem className="flex flex-col gap-3">
 						<SectionHeading>Kiddiedu</SectionHeading>
@@ -34,11 +34,11 @@ export function FeaturedProjects() {
 				</RevealGroup>
 
 				<Reveal className="mt-10 w-full md:mt-14" amount={0.15}>
-					<div className="-mx-6 overflow-x-auto px-6 md:mx-0 md:overflow-visible md:px-0">
+					<div className="flex justify-center">
 						<Image
 							src={featuredKiddiedu}
 							alt="Kiddiedu dashboards, class booking screens, and mobile app views"
-							className="w-180 min-w-180 max-w-none rounded-xl md:w-full md:min-w-0"
+							className="w-full rounded-xl"
 						/>
 					</div>
 				</Reveal>

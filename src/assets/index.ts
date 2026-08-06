@@ -26,6 +26,8 @@ export { default as logoGlobalBank } from "./images/logo-globalbank.svg";
 
 export { default as AtodBrandLogo } from "./icons/AtodBrandLogo";
 export { default as sparklePlus } from "./icons/sparkle-plus.svg";
+export { default as iconUserQuestion } from "./icons/user-question.svg";
+export { default as iconFeaturedProject } from "./icons/featured-project.svg";
 export { default as checkCircle } from "./icons/check-circle.svg";
 export { default as sparkleSquare } from "./icons/sparkle-square.svg";
 export { default as flowCurveLeft } from "./icons/flow-curve-left.svg";

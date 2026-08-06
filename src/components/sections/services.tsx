@@ -1,7 +1,5 @@
 import Image from "next/image";
-import { UserRoundSearch } from "lucide-react";
-
-import { glowEllipse, gridCard, sparkleSquare } from "@/assets";
+import { glowEllipse, gridCard, iconUserQuestion, sparkleSquare } from "@/assets";
 import { RevealGroup, RevealItem } from "@/components/shared/reveal";
 import { SectionBadge } from "@/components/shared/section-badge";
 import { SectionHeading } from "@/components/shared/section-heading";
@@ -58,7 +56,7 @@ function ServiceCard({ description, squares, className }: ServiceCardProps) {
 
 function GhostCard({ description }: { description: string }) {
 	return (
-		<div className="relative min-h-[180px] overflow-hidden rounded-[18px] sm:h-[212px]">
+		<div className="relative min-h-[180px] overflow-hidden rounded-[18px] border border-white/10 bg-white/5 backdrop-blur-sm sm:h-[212px]">
 			<Image
 				src={sparkleSquare}
 				alt=""
@@ -92,7 +90,7 @@ export function Services() {
 			<div className="relative mx-auto w-full max-w-[1440px] px-6 pb-16 md:pb-20 pt-10 md:pt-20 xl:px-[120px]">
 				<RevealGroup className="flex max-w-[1030px] flex-col items-start gap-6">
 					<RevealItem>
-						<SectionBadge icon={UserRoundSearch}>
+						<SectionBadge icon={iconUserQuestion}>
 							We Do More Than Write Code
 						</SectionBadge>
 					</RevealItem>

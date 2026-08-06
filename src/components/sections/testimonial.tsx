@@ -1,7 +1,5 @@
 import Image from "next/image";
-import { UserRoundSearch } from "lucide-react";
-
-import { avatarLawal, dots, glowEllipse, quote } from "@/assets";
+import { avatarLawal, dots, glowEllipse, iconUserQuestion, quote } from "@/assets";
 import { ExpandableQuote } from "@/components/shared/expandable-quote";
 import { Reveal, RevealGroup, RevealItem } from "@/components/shared/reveal";
 import { SectionBadge } from "@/components/shared/section-badge";
@@ -20,7 +18,7 @@ export function Testimonial() {
 			<div className="relative mx-auto w-full max-w-360 px-6 pb-32 pt-10 md:pt-20 xl:px-30">
 				<RevealGroup className="flex max-w-218.25 flex-col items-start gap-6">
 					<RevealItem>
-						<SectionBadge icon={UserRoundSearch}>
+						<SectionBadge icon={iconUserQuestion}>
 							Testimonial
 						</SectionBadge>
 					</RevealItem>

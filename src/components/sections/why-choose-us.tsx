@@ -1,7 +1,5 @@
 import Image from "next/image";
-import { Network } from "lucide-react";
-
-import { gridBlue, timeline } from "@/assets";
+import { gridBlue, iconFeaturedProject, timeline } from "@/assets";
 import { Reveal, RevealGroup, RevealItem } from "@/components/shared/reveal";
 import { SectionBadge } from "@/components/shared/section-badge";
 import { SectionHeading } from "@/components/shared/section-heading";
@@ -39,7 +37,7 @@ export function WhyChooseUs() {
 			<div className="relative mx-auto w-full max-w-[1440px] px-6 py-10 md:py-20 xl:px-[121px]">
 				<RevealGroup className="mx-auto flex max-w-[694px] flex-col items-center gap-6 text-center">
 					<RevealItem>
-						<SectionBadge icon={Network}>
+						<SectionBadge icon={iconFeaturedProject}>
 							Why Customer Choose ATOD
 						</SectionBadge>
 					</RevealItem>

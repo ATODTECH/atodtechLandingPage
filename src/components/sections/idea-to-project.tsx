@@ -89,10 +89,10 @@ function StepCard({
 export function IdeaToProject() {
 	return (
 		<section id="approach" className="relative overflow-hidden">
-			<div
+			{/* <div
 				aria-hidden
 				className="grid-rules pointer-events-none absolute inset-0 [--grid-rule-gap:180px]"
-			/>
+			/> */}
 			<div
 				aria-hidden
 				className="pointer-events-none absolute left-[8%] top-[15%] size-100 rounded-full bg-brand/18 blur-[120px]"
@@ -108,13 +108,15 @@ export function IdeaToProject() {
 						<OverlineBadge>Our Methodology</OverlineBadge>
 					</RevealItem>
 					<RevealItem>
-						<SectionHeading>Our Idea-to-Project Service</SectionHeading>
+						<SectionHeading>
+							Our Idea-to-Project Service
+						</SectionHeading>
 					</RevealItem>
 					<RevealItem>
 						<p className="text-lg leading-[27px] text-white/65">
-							A structured, end-to-end blueprint designed to turn abstract
-							concepts into enterprise-grade software with absolute
-							transparency.
+							A structured, end-to-end blueprint designed to turn
+							abstract concepts into enterprise-grade software
+							with absolute transparency.
 						</p>
 					</RevealItem>
 				</RevealGroup>
@@ -137,10 +139,12 @@ export function IdeaToProject() {
 				<Reveal className="mt-10 md:mt-16">
 					<div className="flex flex-col items-center justify-center gap-6 text-center sm:flex-row sm:gap-6">
 						<p className="text-base font-semibold leading-5 text-white">
-							Have a unique business case? Let&rsquo;s clarify the path
-							together.
+							Have a unique business case? Let&rsquo;s clarify the
+							path together.
 						</p>
-						<FancyButton href="/contact">Schedule a Consultation</FancyButton>
+						<FancyButton href="/contact">
+							Schedule a Consultation
+						</FancyButton>
 					</div>
 				</Reveal>
 			</div>
