@@ -9,10 +9,6 @@ import {
 	flowDevelop,
 	flowDiscover,
 	flowStrategy,
-	logoBoltshift,
-	logoFeatherDev,
-	logoGlobalBank,
-	logoLightbox,
 } from "@/assets";
 import { FancyButton } from "@/components/shared/fancy-button";
 import { HeroBackdrop } from "@/components/shared/hero-backdrop";
@@ -20,11 +16,13 @@ import { RevealGroup, RevealItem } from "@/components/shared/reveal";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
-const trustedLogos = [
-	{ src: logoBoltshift, alt: "Boltshift", width: 113.6 },
-	{ src: logoLightbox, alt: "Lightbox", width: 110.4 },
-	{ src: logoFeatherDev, alt: "FeatherDev", width: 132.8 },
-	{ src: logoGlobalBank, alt: "GlobalBank", width: 131.2 },
+const capabilities = [
+	"Custom Software",
+	"Mobile Apps",
+	"AI Automation",
+	"Web Platforms",
+	"Product Documentation",
+	"Ongoing Support",
 ];
 
 type FlowStep = {
@@ -148,39 +146,42 @@ export function Hero() {
 
 				<RevealItem>
 					<h1 className="heading-gradient mt-6.75 max-w-290.5 text-center text-[40px] font-medium leading-tight tracking-[-1.44px] sm:text-[56px] lg:text-[72px] lg:leading-22.25">
-						Building Digital Products That Drives Growth
+						Build Better. Automate Smarter. Grow Faster.
 					</h1>
 				</RevealItem>
 
 				<RevealItem>
-					<p className="mt-4 max-w-161.25 text-center text-lg leading-7.5 text-white lg:text-xl">
-						We design and develop websites, mobile apps, and custom
-						software that bring your ideas to life.
+					<p className="mt-4 max-w-240 text-center text-lg leading-7.5 text-white lg:text-xl">
+						ATOD designs and develops custom software, mobile
+						applications, AI-powered automation, websites, and
+						information systems for startups, businesses,
+						institutions, and public-sector organizations.
 					</p>
 				</RevealItem>
 
 				<RevealItem>
-					<FancyButton href="#contact" className="mt-6.75">
-						Contact Us
+					<FancyButton href="/contact" className="mt-6.75">
+						Start Your Project
 					</FancyButton>
 				</RevealItem>
 
-				<RevealItem className="mt-10 flex flex-col items-center gap-4">
-					<p className="text-center text-sm leading-5 tracking-[0.56px] text-[#eaeaea] sm:bg-linear-to-b sm:from-[#eaeaea] sm:to-[#eaeaea]/0 sm:bg-clip-text sm:text-transparent">
-						Trusted by startups, enterprises, and innovators
-						worldwide.
-					</p>
-					<div className="flex flex-wrap items-center justify-center gap-8">
-						{trustedLogos.map((logo) => (
-							<Image
-								key={logo.alt}
-								src={logo.src}
-								alt={logo.alt}
-								className="h-8 w-auto"
-								style={{ width: logo.width }}
-							/>
+				<RevealItem className="mt-10 flex flex-col items-center gap-2">
+					<ul className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-center text-sm leading-6 text-white/60 lg:text-base">
+						{capabilities.map((capability, index) => (
+							<li key={capability} className="flex items-center gap-2">
+								{index > 0 && (
+									<span aria-hidden className="text-white/35">
+										&bull;
+									</span>
+								)}
+								{capability}
+							</li>
 						))}
-					</div>
+					</ul>
+					<p className="max-w-160 text-center text-base leading-6 text-white">
+						Delivering digital projects for clients and users in the
+						United States and Nigeria.
+					</p>
 				</RevealItem>
 
 				<RevealGroup

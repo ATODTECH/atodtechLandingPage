@@ -1,22 +1,20 @@
 import Image from "next/image";
-import { Network } from "lucide-react";
-
-import { gridBlue, timeline } from "@/assets";
+import { gridBlue, iconFeaturedProject, timeline } from "@/assets";
 import { Reveal, RevealGroup, RevealItem } from "@/components/shared/reveal";
 import { SectionBadge } from "@/components/shared/section-badge";
 import { SectionHeading } from "@/components/shared/section-heading";
 
 const reasons = [
-	"Experienced team of designers & developers",
-	"End-to-end digital product support",
-	"Proven track record with startups & enterprises",
-	"Dedicated to building products that last",
+	"End-to-end delivery, from idea discovery to launch and maintenance",
+	"Product enhancement through our Product Intelligence & Innovation Team",
+	"Experience serving projects in the United States and Nigeria",
+	"Custom software built around real business processes",
 ];
 
 const reasonPositions = [
-	"left-0 w-[216px]",
-	"left-[272px] w-[251px]",
-	"left-[638px] w-[236px]",
+	"left-0 w-[236px]",
+	"left-[272px] w-[276px]",
+	"left-[638px] w-[212px]",
 	"left-[921px] w-[206px]",
 ];
 
@@ -39,7 +37,9 @@ export function WhyChooseUs() {
 			<div className="relative mx-auto w-full max-w-[1440px] px-6 py-10 md:py-20 xl:px-[121px]">
 				<RevealGroup className="mx-auto flex max-w-[694px] flex-col items-center gap-6 text-center">
 					<RevealItem>
-						<SectionBadge icon={Network}>Why Choose Us</SectionBadge>
+						<SectionBadge icon={iconFeaturedProject}>
+							Why Customer Choose ATOD
+						</SectionBadge>
 					</RevealItem>
 					<RevealItem>
 						<SectionHeading>
@@ -49,7 +49,7 @@ export function WhyChooseUs() {
 				</RevealGroup>
 
 				{/* Desktop: dotted timeline with texts at exact design offsets, centered on the viewport */}
-				<div className="relative left-1/2 mt-16 hidden h-[200px] w-[1198px] -translate-x-1/2 min-[1200px]:block">
+				<div className="relative left-1/2 mt-16 hidden h-[220px] w-[1198px] -translate-x-1/2 min-[1200px]:block">
 					<Reveal className="absolute left-[51px] top-[24px]" direction="none">
 						<Image
 							src={timeline}
@@ -61,7 +61,7 @@ export function WhyChooseUs() {
 					<RevealGroup
 						stagger={0.12}
 						delay={0.2}
-						className="absolute left-[36px] top-[105px] h-[60px] w-[1127px]"
+						className="absolute left-[36px] top-[105px] h-[90px] w-[1127px]"
 					>
 						{reasons.map((reason, i) => (
 							<RevealItem
@@ -69,7 +69,7 @@ export function WhyChooseUs() {
 								distance={16}
 								className={`absolute top-0 ${reasonPositions[i]}`}
 							>
-								<p className="text-xl leading-[30px] tracking-[-0.4px] text-white">
+								<p className="text-base leading-[30px] tracking-[-0.4px] text-white">
 									{reason}
 								</p>
 							</RevealItem>

@@ -48,8 +48,8 @@ export function Cta() {
 							</p>
 						</RevealItem>
 						<RevealItem>
-							<FancyButton href="mailto:hello@atod.tech" className="mt-7">
-								Get in touch
+							<FancyButton href="/contact" className="mt-7">
+								Discuss Your Project
 							</FancyButton>
 						</RevealItem>
 					</RevealGroup>

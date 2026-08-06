@@ -12,6 +12,7 @@ export { default as visionIllustration } from "./images/vision-illustration.png"
 export { default as projectSabiwork } from "./images/card_1.png";
 export { default as projectCyberdependency } from "./images/card_2.png";
 export { default as projectPickup } from "./images/card_3.png";
+export { default as featuredKiddiedu } from "./images/featured.svg";
 export { default as gridCard } from "./images/grid-card.png";
 export { default as gridBlue } from "./images/grid-blue.png";
 export { default as glowEllipse } from "./images/glow-ellipse.svg";
@@ -25,6 +26,8 @@ export { default as logoGlobalBank } from "./images/logo-globalbank.svg";
 
 export { default as AtodBrandLogo } from "./icons/AtodBrandLogo";
 export { default as sparklePlus } from "./icons/sparkle-plus.svg";
+export { default as iconUserQuestion } from "./icons/user-question.svg";
+export { default as iconFeaturedProject } from "./icons/featured-project.svg";
 export { default as checkCircle } from "./icons/check-circle.svg";
 export { default as sparkleSquare } from "./icons/sparkle-square.svg";
 export { default as flowCurveLeft } from "./icons/flow-curve-left.svg";

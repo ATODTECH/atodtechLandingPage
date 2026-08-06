@@ -220,4 +220,22 @@
     box-shadow: inset 0px 1px 0px 0px rgba(255, 255, 255, 0.35),
       0px 1px 2px 0px rgba(9, 14, 38, 0.5), 0px 0px 24px 4px rgba(30, 51, 138, 0.55);
   }
+
+  /* Faint vertical rules used behind the methodology and consultation sections */
+  .grid-rules {
+    background-image: repeating-linear-gradient(
+      to right,
+      var(--grid-rule-color, rgba(255, 255, 255, 0.008)) 0px,
+      var(--grid-rule-color, rgba(255, 255, 255, 0.008)) 1px,
+      transparent 1px,
+      transparent var(--grid-rule-gap, 96px)
+    );
+    mask-image: linear-gradient(
+      180deg,
+      transparent 0%,
+      #000 32%,
+      #000 68%,
+      transparent 100%
+    );
+  }
 }
