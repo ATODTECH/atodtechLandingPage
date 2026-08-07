@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-import { phoneMockup2, phoneMockup3 } from "@/assets";
+import { spiceIslandGrill } from "@/assets";
 import { RevealGroup, RevealItem } from "@/components/shared/reveal";
 
 const detailBlocks = [
@@ -39,21 +39,11 @@ export function ProjectDetails() {
 	return (
 		<section className="relative">
 			<div className="mx-auto grid w-full max-w-360 gap-12 px-6 py-10 md:py-20 lg:grid-cols-2 lg:items-start lg:gap-8 xl:px-30">
-				<RevealGroup
-					stagger={0.12}
-					className="flex items-start justify-center gap-4 sm:gap-8"
-				>
-					<RevealItem className="w-1/2 max-w-78.5">
+				<RevealGroup className="flex items-start justify-center">
+					<RevealItem className="w-full max-w-170">
 						<Image
-							src={phoneMockup2}
-							alt="Sabiwork app - home screen"
-							className="w-full"
-						/>
-					</RevealItem>
-					<RevealItem className="mt-12 w-1/2 max-w-78.5">
-						<Image
-							src={phoneMockup3}
-							alt="Sabiwork app - artisan profile screen"
+							src={spiceIslandGrill}
+							alt="Spice Island Gril - website and app screens"
 							className="w-full"
 						/>
 					</RevealItem>
