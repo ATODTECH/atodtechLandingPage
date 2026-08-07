@@ -10,6 +10,7 @@ type PageHeroProps = {
 	action?: { label: string; href: string };
 	contentClassName?: string;
 	titleClassName?: string;
+	descriptionClassName?: string;
 	children?: React.ReactNode;
 };
 
@@ -20,6 +21,7 @@ export function PageHero({
 	action,
 	contentClassName,
 	titleClassName,
+	descriptionClassName,
 	children,
 }: PageHeroProps) {
 	return (
@@ -46,7 +48,12 @@ export function PageHero({
 					</h1>
 				</RevealItem>
 				<RevealItem>
-					<p className="mt-6 max-w-161.25 text-center text-lg leading-7.5 text-white lg:text-xl">
+					<p
+						className={cn(
+							"mt-6 max-w-161.25 text-center text-lg leading-7.5 text-white lg:text-xl",
+							descriptionClassName,
+						)}
+					>
 						{description}
 					</p>
 				</RevealItem>
