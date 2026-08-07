@@ -1,6 +1,10 @@
 import type { StaticImageData } from "next/image";
 
 import {
+	connectRide1,
+	connectRide2,
+	connectRide3,
+	connectRide4,
 	cyberShot1,
 	cyberShot2,
 	cyberShot3,
@@ -22,9 +26,11 @@ export type CaseStudySlide = {
 };
 
 export type CaseStudyTheme = {
-	/** `navy` is a coloured panel with white copy; `light` is white with dark copy. */
-	tone: "navy" | "light";
-	/** Badge, title, dots and nav colour. Only the `light` tone uses it. */
+	/** `solid` is a coloured panel with white copy; `light` is white with dark copy. */
+	tone: "solid" | "light";
+	/** Panel background, and the chevron/badge colour drawn on white. `solid` only. */
+	panel?: string;
+	/** Active dot on `solid`; badge, title, dots and nav on `light`. */
 	accent?: string;
 };
 
@@ -54,7 +60,7 @@ export const projects: Project[] = [
 		category: "Artisan Platform",
 		image: projectSabiwork,
 		caseStudyTitle: "Sabiwork - Artisan Platform",
-		theme: { tone: "navy" },
+		theme: { tone: "solid", panel: "#1e338a", accent: "#f56f46" },
 		galleryLayout: "device",
 		mockups: [phoneMockup2, phoneMockup3, phoneMockup1],
 		slides: [
@@ -132,32 +138,40 @@ export const projects: Project[] = [
 		],
 	},
 	{
-		slug: "pickup",
+		slug: "connect-n-ride",
 		name: "Pickup App",
 		category: "Interstate Travel",
 		image: projectPickup,
-		caseStudyTitle: "Pickup - Interstate Travel",
-		theme: { tone: "navy" },
+		caseStudyTitle: "Connect \u2018n\u2019 Ride - Interstate Travel",
+		theme: { tone: "solid", panel: "#1e88e5", accent: "#fbc02d" },
 		galleryLayout: "device",
-		mockups: [projectPickup],
+		mockups: [connectRide1, connectRide2, connectRide3, connectRide4],
 		slides: [
 			{
 				label: "Overview",
-				body: "Case study copy for Pickup is still being written. Add the project overview here.",
+				body: "Connect \u2018n\u2019 Ride App connects verified drivers travelling interstate with passengers going in the same direction and allows basic package delivery. It prioritizes safety, verification, and compliance with FRSC regulations, while being scalable to add advanced features post-launch.",
 			},
 			{
 				label: "Challenges",
-				body: "Add the problems this project set out to solve.",
+				body: "Many private vehicle owners travel with empty seats or unused cargo space, while passengers and senders struggle to find affordable transportation and delivery options. This gap leads to wasted resources and higher travel costs.",
 			},
 			{
 				label: "Solutions",
-				items: ["Add the first solution.", "Add the second solution."],
+				items: [
+					"We connect travellers with private vehicle owners who have available seats for affordable interstate trips.",
+					"We enable secure package delivery by matching senders with verified drivers travelling to the same destination.",
+					"We built trust through identity verification, ratings, and real-time trip tracking for every ride and delivery.",
+					"We simplify booking and trip management with easy search, secure payments, and instant communication between users and drivers.",
+				],
 			},
 			{
 				label: "Key Features",
 				items: [
-					"Add the first key feature.",
-					"Add the second key feature.",
+					"Browse and book available interstate trips posted by verified private car owners and bus operators.",
+					"Send packages by matching with trusted drivers already travelling to your destination.",
+					"Verify users and drivers with government-issued IDs, ratings, reviews, and profile badges to ensure safety.",
+					"Track your ride or package in real time, receive trip updates, and get notified at every stage of the journey.",
+					"Book rides, pay securely within the app, manage transactions, and access digital receipts for every trip or delivery.",
 				],
 			},
 		],

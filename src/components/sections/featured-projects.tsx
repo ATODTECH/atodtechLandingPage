@@ -13,7 +13,9 @@ export function FeaturedProjects() {
 			<div className="mx-auto flex w-full max-w-[1440px] flex-col items-center px-6 py-10 md:py-20 xl:px-[120px]">
 				<RevealGroup className="flex max-w-[1151px] flex-col items-center gap-6 text-center">
 					<RevealItem>
-						<SectionBadge icon={iconFeaturedProject}>Featured Project</SectionBadge>
+						<SectionBadge icon={iconFeaturedProject}>
+							Featured Project
+						</SectionBadge>
 					</RevealItem>
 					<RevealItem className="flex flex-col gap-3">
 						<SectionHeading>Kiddiedu</SectionHeading>
@@ -23,12 +25,14 @@ export function FeaturedProjects() {
 					</RevealItem>
 					<RevealItem>
 						<p className="text-base leading-[26px] text-white/70">
-							Kiddiedu demonstrates ATOD&rsquo;s ability to transform an idea
-							into a practical education technology product. The project
-							reflects experience in product planning, educational workflows,
-							information management, user-centered design, mobile and web
-							development, parent-teacher-student engagement, and institution
-							documentation, deployment, and continuous improvement.
+							Kiddiedu demonstrates ATOD&rsquo;s ability to
+							transform an idea into a practical education
+							technology product. The project reflects experience
+							in product planning, educational workflows,
+							information management, user-centered design, mobile
+							and web development, parent-teacher-student
+							engagement, and institution documentation,
+							deployment, and continuous improvement.
 						</p>
 					</RevealItem>
 				</RevealGroup>
@@ -45,12 +49,16 @@ export function FeaturedProjects() {
 
 				<Reveal>
 					<FancyButton
-						href="#"
+						href="https://www.kiddiedu.com/"
+						target="_blank"
 						icon={null}
 						className="mt-10 md:mt-14"
 					>
 						<span className="inline-flex items-center gap-2">
 							View Live Product
+							<span className="sr-only">
+								(opens in a new tab)
+							</span>
 							<ExternalLink className="size-4" aria-hidden />
 						</span>
 					</FancyButton>

@@ -23,16 +23,16 @@ import { cn } from "@/lib/utils";
 const SLIDE_DURATION = 5_000;
 
 const TONES = {
-	navy: {
-		panel: "bg-brand",
-		badge: "bg-white text-brand",
+	solid: {
+		panel: "bg-(--case-panel)",
+		badge: "bg-white text-(--case-panel)",
 		title: "text-white",
 		label: "text-white",
 		body: "text-white/90",
 		marker: "marker:text-white/90",
-		dotActive: "bg-brand-accent",
+		dotActive: "bg-(--case-accent)",
 		dotIdle: "bg-white/40 hover:bg-white/70",
-		nav: "border-brand/20 bg-white text-brand hover:bg-white/85",
+		nav: "border-transparent bg-white text-(--case-panel) hover:bg-white/85",
 		close: "bg-white/15 text-white hover:bg-white/25",
 		ring: "focus-visible:outline-white",
 	},
@@ -114,7 +114,8 @@ export function ProjectCaseStudyModal({ project }: { project: Project }) {
 			overlayClassName="bg-page/80 supports-backdrop-filter:backdrop-blur-sm"
 			style={
 				{
-					"--case-accent": project.theme.accent ?? "#1e338a",
+					"--case-panel": project.theme.panel ?? "#1e338a",
+					"--case-accent": project.theme.accent ?? "#f56f46",
 				} as CSSProperties
 			}
 			className={cn(
