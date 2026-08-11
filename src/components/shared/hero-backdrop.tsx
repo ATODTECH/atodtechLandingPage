@@ -20,6 +20,7 @@ export function HeroBackdrop({ priority = false }: { priority?: boolean }) {
 				alt=""
 				aria-hidden
 				priority={priority}
+				sizes="100vw"
 				className="pointer-events-none absolute inset-0 size-full object-cover"
 			/>
 			{sparklePositions.map((position) => (

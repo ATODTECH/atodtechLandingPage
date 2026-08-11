@@ -16,11 +16,13 @@ export function ProjectOverview() {
 				</RevealItem>
 				<RevealItem>
 					<p className="mt-11 max-w-268 text-lg leading-normal text-white">
-						Sabiwork is a mobile application designed to connect users with
-						skilled artisans for everyday services such as plumbers,
-						electricians, carpenters, and painters. The goal was to create a
-						reliable, fast, and user-friendly platform where people can find
-						trusted handymen for their everyday needs.
+						The Spice Island Restaurant Website is a modern,
+						responsive digital platform designed to strengthen the
+						restaurant's online presence and enhance the customer
+						experience. It is designed with a user-centric
+						interface, fast performance, and mobile responsiveness
+						to provide a seamless experience across all devices
+						while supporting the restaurant's business growth.
 					</p>
 				</RevealItem>
 			</RevealGroup>

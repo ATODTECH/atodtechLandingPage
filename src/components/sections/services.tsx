@@ -32,6 +32,7 @@ function ServiceCard({ description, squares, className }: ServiceCardProps) {
 				src={gridCard}
 				alt=""
 				aria-hidden
+				sizes="430px"
 				className="pointer-events-none absolute left-1/2 top-[-97px] size-[430px] max-w-none -translate-x-1/2"
 			/>
 			{(Object.keys(squareSlots) as (keyof typeof squareSlots)[]).map(

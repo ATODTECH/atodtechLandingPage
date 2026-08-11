@@ -41,6 +41,8 @@ export function WhoWeAre() {
 								src={aboutTeamGroup}
 								alt="The Atod team gathered around a tablet"
 								fill
+								sizes="(min-width: 1440px) 584px, (min-width: 1024px) calc((100vw - 80px) / 2), calc(100vw - 48px)"
+								placeholder="blur"
 								className="object-cover"
 							/>
 						</div>
@@ -51,6 +53,8 @@ export function WhoWeAre() {
 								src={aboutTeamTablet}
 								alt="A designer reviewing work on a tablet"
 								fill
+								sizes="(min-width: 1440px) 284px, (min-width: 1024px) calc((100vw - 96px) / 4), calc((100vw - 64px) / 2)"
+								placeholder="blur"
 								className="object-cover"
 							/>
 						</div>
@@ -59,6 +63,8 @@ export function WhoWeAre() {
 								src={aboutTeamLaptop}
 								alt="A developer working on a laptop"
 								fill
+								sizes="(min-width: 1440px) 284px, (min-width: 1024px) calc((100vw - 96px) / 4), calc((100vw - 64px) / 2)"
+								placeholder="blur"
 								className="object-cover"
 							/>
 						</div>

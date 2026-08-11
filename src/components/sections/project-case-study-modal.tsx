@@ -317,6 +317,7 @@ export function ProjectCaseStudyModal({ project }: { project: Project }) {
 										<Image
 											src={mockup}
 											alt={`${project.name} screen ${index + 1} of ${project.mockups.length}`}
+											sizes="(min-width: 640px) 50vw, 78vw"
 											className="h-auto w-full select-none rounded-lg"
 											draggable={false}
 										/>

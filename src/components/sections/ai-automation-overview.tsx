@@ -68,24 +68,20 @@ export function AiAutomationOverview() {
 	return (
 		<section className="relative overflow-hidden">
 			<div className="relative mx-auto w-full max-w-360 px-6 pb-10 pt-33 md:pb-20 lg:pt-45 xl:px-30">
-				{/*
-				 * Splits at xl, not lg: at 1024 the right column is narrow enough that
-				 * its two card columns fall to ~242px and long labels wrap to three
-				 * lines. Staying stacked until 1280 keeps the cards readable.
-				 */}
 				<div className="grid gap-12 xl:grid-cols-[520fr_656fr] xl:gap-16">
 					<RevealGroup className="flex flex-col">
 						<RevealItem direction="right">
 							<h1 className="text-[28px] font-bold leading-tight text-white sm:text-[32px] lg:text-[40px] lg:leading-13">
-								Use AI to Save Time, Reduce Manual Work and Serve Customers
-								Better
+								Use AI to Save Time, Reduce Manual Work and
+								Serve Customers Better
 							</h1>
 						</RevealItem>
 						<RevealItem direction="right">
 							<p className="mt-6 text-base leading-6 text-white/70">
-								AI should solve real operational problems, not simply add
-								another trend to your business. ATOD identifies repetitive,
-								slow, or error-prone activities and designs practical, secure
+								AI should solve real operational problems, not
+								simply add another trend to your business. ATOD
+								identifies repetitive, slow, or error-prone
+								activities and designs practical, secure
 								automations around them.
 							</p>
 						</RevealItem>
@@ -93,8 +89,8 @@ export function AiAutomationOverview() {
 							<Image
 								src={aiAutomation}
 								alt="A neural network visualisation labelled Neural Engine and Secure Flow"
-								className="w-full"
-								sizes="(min-width: 1280px) 520px, 100vw"
+								sizes="(min-width: 1280px) 520px, calc(100vw - 48px)"
+								className="w-full h-full object-contain"
 							/>
 						</RevealItem>
 					</RevealGroup>
@@ -116,10 +112,10 @@ export function AiAutomationOverview() {
 			<div className="border-y border-white/8 bg-white/2">
 				<div className="mx-auto w-full max-w-360 px-6 py-6 xl:px-20">
 					<p className="text-sm italic leading-6 text-white/60">
-						We combine AI with strict business rules, approvals, security
-						controls, and human-in-the-loop reviews so that your automation
-						remains 100% useful, responsible, and aligned with your
-						organizational compliance.
+						We combine AI with strict business rules, approvals,
+						security controls, and human-in-the-loop reviews so that
+						your automation remains 100% useful, responsible, and
+						aligned with your organizational compliance.
 					</p>
 				</div>
 			</div>

@@ -39,6 +39,7 @@ export function VisionApproach() {
 					<Image
 						src={visionIllustration}
 						alt="Illustration of ideas flowing from an open mind"
+						sizes="332px"
 						className="mx-auto w-full max-w-83"
 					/>
 				</RevealItem>

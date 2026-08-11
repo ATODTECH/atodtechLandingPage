@@ -19,6 +19,7 @@ export function ProjectShowcase() {
 					<Image
 						src={project.image}
 						alt={`${project.name} — ${project.category}`}
+						sizes="(min-width: 1024px) 371px, (min-width: 640px) calc((100vw - 92px) / 2), calc(100vw - 48px)"
 						className="w-full rounded-xl"
 					/>
 					<Dialog>

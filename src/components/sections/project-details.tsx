@@ -3,34 +3,45 @@ import Image from "next/image";
 import { spiceIslandGrill } from "@/assets";
 import { RevealGroup, RevealItem } from "@/components/shared/reveal";
 
-const detailBlocks = [
+type DetailBlock = {
+	title: string;
+	body?: string;
+	items?: string[];
+};
+
+const detailBlocks: DetailBlock[] = [
 	{
 		title: "Challenges",
-		body: "Finding reliable artisans is often time-consuming and stressful. Customers face issues with trust, availability, and quality of work. On the other side, skilled artisans often lack visibility and opportunities to showcase their skills to a wider audience.",
+		items: [
+			"Limited online visibility and digital presence.",
+			"Customers lacked a convenient way to browse the menu or make reservations online.",
+			"Manual handling of reservations and customer inquiries increased operational workload.",
+		],
 	},
 	{
 		title: "Solutions",
 		items: [
-			"Makes it easy for customers to discover, book, and review artisans.",
-			"Provides artisans with more visibility and consistent job opportunities.",
-			"Ensures trust and reliability through a rating and review system.",
+			"Developed a modern, responsive restaurant website with an intuitive user interface.",
+			"Implemented an online reservation system to simplify table bookings.",
+			"Created a digital menu with organized food categories and item details.",
 		],
 	},
 	{
 		title: "Key Features",
 		items: [
-			"Browse artisans by category (plumbing, electrical, carpentry).",
-			"Schedule services at your convenience.",
-			"Seamless communication between users and artisans.",
-			"Pay directly through the app.",
+			"Responsive and mobile-friendly design.",
+			"Gallery for food, drinks, and restaurant ambience.",
+			"Table reservation/booking system.",
+			"Contact Us page with contact form and Google Maps integration.",
+			"Admin dashboard for managing restaurant content.",
 		],
 	},
 	{
 		title: "Product Impact",
 		items: [
-			"Helped hundreds of customers connect with verified artisans.",
-			"Increased visibility for skilled workers in local communities.",
-			"Improved trust and convenience in accessing handyman services.",
+			"Increase online orders through a seamless and user-friendly ordering experience.",
+			"Improve customer satisfaction with faster ordering, real time tracking, and secure payments.",
+			"Boost customer retention by offering personalized recommendations, promotions, and an easy reordering process.",
 		],
 	},
 ];
@@ -43,7 +54,8 @@ export function ProjectDetails() {
 					<RevealItem className="w-full max-w-170">
 						<Image
 							src={spiceIslandGrill}
-							alt="Spice Island Gril - website and app screens"
+							alt="Spice Island Grill - website and app screens"
+							sizes="(min-width: 1024px) 680px, calc(100vw - 48px)"
 							className="w-full"
 						/>
 					</RevealItem>

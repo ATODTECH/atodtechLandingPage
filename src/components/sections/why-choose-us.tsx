@@ -25,12 +25,14 @@ export function WhyChooseUs() {
 				src={gridBlue}
 				alt=""
 				aria-hidden
+				sizes="430px"
 				className="pointer-events-none absolute -top-[72px] left-[calc(50%-753px)] size-[430px] max-w-none"
 			/>
 			<Image
 				src={gridBlue}
 				alt=""
 				aria-hidden
+				sizes="430px"
 				className="pointer-events-none absolute left-[calc(50%+395px)] top-[69px] size-[430px] max-w-none"
 			/>
 
