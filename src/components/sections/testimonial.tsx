@@ -43,6 +43,7 @@ export function Testimonial() {
 								<Image
 									src={avatarLawal}
 									alt="Portrait of Lawal Halima"
+									sizes="(min-width: 640px) 188px, 140px"
 									className="size-35 rounded-full object-cover sm:size-47"
 								/>
 								<div className="flex max-w-76.25 flex-col gap-6.75">

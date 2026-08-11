@@ -40,6 +40,7 @@ export function OurMission() {
 							src={missionRing}
 							alt=""
 							aria-hidden
+							sizes="144px"
 							className="pointer-events-none absolute right-0 top-1/2 hidden w-36 -translate-y-1/2 lg:block"
 						/>
 						<div className="grid items-end gap-0 md:gap-8 lg:grid-cols-2">
@@ -63,6 +64,7 @@ export function OurMission() {
 								<Image
 									src={missionPointing}
 									alt="A smiling man pointing toward the viewer"
+									sizes="(min-width: 1024px) 560px, calc(100vw - 48px)"
 									className="w-full max-w-140"
 								/>
 							</div>

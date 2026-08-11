@@ -40,3 +40,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Design masters (Figma SVG exports) rasterized by scripts/rasterize-figma-svgs.mjs
+src/assets/images/_originals/

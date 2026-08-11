@@ -11,12 +11,11 @@ import {
 	phoneMockup1,
 	phoneMockup2,
 	phoneMockup3,
+	projectConnectAndRide,
 	projectCyberdependency,
-	projectPickup,
-	projectSabiwork,
+	projectProHandy,
 } from "@/assets";
 
-/** A bullet, optionally with a bold lead-in ahead of the sentence. */
 export type CaseStudyItem = string | { lead: string; text: string };
 
 export type CaseStudySlide = {
@@ -26,19 +25,11 @@ export type CaseStudySlide = {
 };
 
 export type CaseStudyTheme = {
-	/** `solid` is a coloured panel with white copy; `light` is white with dark copy. */
 	tone: "solid" | "light";
-	/** Panel background, and the chevron/badge colour drawn on white. `solid` only. */
 	panel?: string;
-	/** Active dot on `solid`; badge, title, dots and nav on `light`. */
 	accent?: string;
 };
 
-/**
- * `device` keeps screens at their natural height. `page` is for long website
- * scrolls: they are pinned to the top of a fixed frame and cropped at the
- * bottom, so you read the top of the page instead of a shrunken sliver.
- */
 export type GalleryLayout = "device" | "page";
 
 export type Project = {
@@ -55,18 +46,18 @@ export type Project = {
 
 export const projects: Project[] = [
 	{
-		slug: "sabiwork",
-		name: "Sabiwork App",
+		slug: "prohandy",
+		name: "ProHandy App",
 		category: "Artisan Platform",
-		image: projectSabiwork,
-		caseStudyTitle: "Sabiwork - Artisan Platform",
+		image: projectProHandy,
+		caseStudyTitle: "ProHandy - Artisan Platform",
 		theme: { tone: "solid", panel: "#1e338a", accent: "#f56f46" },
 		galleryLayout: "device",
 		mockups: [phoneMockup2, phoneMockup3, phoneMockup1],
 		slides: [
 			{
 				label: "Overview",
-				body: "Sabiwork is a sleek, modern mobile application built to connect homeowners with verified, high-quality artisans for urgent plumbing, electrical, and maintenance services. We solved the confidence gap with upfront pricing transparency, detailed rating structures, and real-time live mapping.",
+				body: "ProHandy is a sleek, modern mobile application built to connect homeowners with verified, high-quality artisans for urgent plumbing, electrical, and maintenance services. We solved the confidence gap with upfront pricing transparency, detailed rating structures, and real-time live mapping.",
 			},
 			{
 				label: "Challenges",
@@ -139,9 +130,9 @@ export const projects: Project[] = [
 	},
 	{
 		slug: "connect-n-ride",
-		name: "Pickup App",
+		name: "ConnectNRide App",
 		category: "Interstate Travel",
-		image: projectPickup,
+		image: projectConnectAndRide,
 		caseStudyTitle: "Connect \u2018n\u2019 Ride - Interstate Travel",
 		theme: { tone: "solid", panel: "#1e88e5", accent: "#fbc02d" },
 		galleryLayout: "device",

@@ -23,6 +23,7 @@ export function Cta() {
 							<Image
 								src={ctaDashboard}
 								alt="Analytics dashboard project"
+								sizes="(min-width: 465px) 417px, calc(100vw - 48px)"
 								className="w-full rounded-[12px] border-4 border-[#1e88e5]"
 							/>
 						</RevealItem>
@@ -30,6 +31,7 @@ export function Cta() {
 							<Image
 								src={ctaMap}
 								alt="Map-based logistics project"
+								sizes="(min-width: 465px) 417px, calc(100vw - 48px)"
 								className="w-full rounded-[12px] border-4 border-[#1e88e5]"
 							/>
 						</RevealItem>

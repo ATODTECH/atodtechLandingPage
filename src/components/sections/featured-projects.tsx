@@ -42,6 +42,7 @@ export function FeaturedProjects() {
 						<Image
 							src={featuredKiddiedu}
 							alt="Kiddiedu dashboards, class booking screens, and mobile app views"
+							sizes="(min-width: 1440px) 1200px, (min-width: 1280px) calc(100vw - 240px), calc(100vw - 48px)"
 							className="w-full rounded-xl"
 						/>
 					</div>
