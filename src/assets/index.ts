@@ -16,7 +16,7 @@ export { default as aboutTeamLaptop } from "./images/about-team-laptop.png";
 export { default as missionPointing } from "./images/mission-pointing.png";
 export { default as missionRing } from "./images/mission-ring.png";
 export { default as visionIllustration } from "./images/vision-illustration.png";
-export { default as projectHandworkExpert } from "./images/handwork-expert.png";
+export { default as projectHandworkExpert } from "./images/card_1.png";
 export { default as projectCyberdependency } from "./images/cyberdependency.png";
 export { default as projectConnectAndRide } from "./images/connectandride.png";
 export { default as featuredKiddiedu } from "./images/featured.png";

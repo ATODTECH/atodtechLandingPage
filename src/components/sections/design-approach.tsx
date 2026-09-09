@@ -43,7 +43,7 @@ export function DesignApproach() {
 				<RevealItem direction="left">
 					<Image
 						src={designApproachImg}
-						alt="A Sabiwork user booking an artisan from their phone"
+						alt="A HandworkExpert user booking an artisan from their phone"
 						sizes="(min-width: 1024px) 573px, calc(100vw - 48px)"
 						className="w-full"
 					/>
