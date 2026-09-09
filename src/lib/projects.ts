@@ -13,7 +13,7 @@ import {
 	phoneMockup3,
 	projectConnectAndRide,
 	projectCyberdependency,
-	projectProHandy,
+	projectHandworkExpert,
 } from "@/assets";
 
 export type CaseStudyItem = string | { lead: string; text: string };
@@ -46,18 +46,18 @@ export type Project = {
 
 export const projects: Project[] = [
 	{
-		slug: "prohandy",
-		name: "ProHandy App",
+		slug: "handwork-expert",
+		name: "HandworkExpert App",
 		category: "Artisan Platform",
-		image: projectProHandy,
-		caseStudyTitle: "ProHandy - Artisan Platform",
+		image: projectHandworkExpert,
+		caseStudyTitle: "HandworkExpert - Artisan Platform",
 		theme: { tone: "solid", panel: "#1e338a", accent: "#f56f46" },
 		galleryLayout: "device",
 		mockups: [phoneMockup2, phoneMockup3, phoneMockup1],
 		slides: [
 			{
 				label: "Overview",
-				body: "ProHandy is a sleek, modern mobile application built to connect homeowners with verified, high-quality artisans for urgent plumbing, electrical, and maintenance services. We solved the confidence gap with upfront pricing transparency, detailed rating structures, and real-time live mapping.",
+				body: "HandworkExpert is a sleek, modern mobile application built to connect homeowners with verified, high-quality artisans for urgent plumbing, electrical, and maintenance services. We solved the confidence gap with upfront pricing transparency, detailed rating structures, and real-time live mapping.",
 			},
 			{
 				label: "Challenges",
