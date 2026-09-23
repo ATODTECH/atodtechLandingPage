@@ -14,6 +14,6 @@ export async function getActor(): Promise<Actor | null> {
 /** For pages and actions that need a signed-in user. */
 export async function requireActor(): Promise<Actor> {
 	const actor = await getActor();
-	if (!actor) redirect("/sign-in");
+	if (!actor) redirect("/portal/sign-in");
 	return actor;
 }

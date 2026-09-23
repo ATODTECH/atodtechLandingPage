@@ -12,12 +12,9 @@ import {
 } from "@/lib/db/schema";
 import { sendInviteEmail } from "@/lib/email/invite-email";
 import { logActivity } from "@/lib/dms/activity";
-import {
-	assertCan,
-	ForbiddenError,
-	NO_RIGHTS,
-	type Actor,
-} from "@/lib/dms/permissions";
+import { DmsError, ForbiddenError } from "@/lib/dms/errors";
+import { isUuid } from "@/lib/dms/format";
+import { assertCan, NO_RIGHTS, type Actor } from "@/lib/dms/permissions";
 import {
 	generateToken,
 	hashToken,
@@ -25,15 +22,8 @@ import {
 	normalizeEmail,
 } from "@/lib/dms/tokens";
 
-export class InviteError extends Error {
-	constructor(message: string) {
-		super(message);
-		this.name = "InviteError";
-	}
-}
-
 export function inviteUrl(token: string) {
-	return `${process.env.NEXT_PUBLIC_APP_URL}/invite/${token}`;
+	return `${process.env.NEXT_PUBLIC_APP_URL}/portal/invite/${token}`;
 }
 
 /** Invite someone to create an account, as an admin or a client. */
@@ -48,7 +38,7 @@ export async function createUserInvite(
 		where: eq(user.email, email),
 	});
 	if (existing && (existing.role !== "client" || input.role === "client")) {
-		throw new InviteError("That person already has an account.");
+		throw new DmsError("That person already has an account.");
 	}
 
 	// Only one open invite per email: revoke any older ones.
@@ -86,10 +76,10 @@ export async function createUserInvite(
 }
 
 export async function revokeUserInvite(actor: Actor, inviteId: string) {
-	const invite = await db.query.userInvite.findFirst({
-		where: eq(userInvite.id, inviteId),
-	});
-	if (!invite) throw new InviteError("Invite not found.");
+	const invite = isUuid(inviteId)
+		? await db.query.userInvite.findFirst({ where: eq(userInvite.id, inviteId) })
+		: undefined;
+	if (!invite) throw new DmsError("Invite not found.");
 	assertCan(actor, invite.role === "admin" ? "canManageAdmins" : "canShare");
 
 	await db
@@ -175,9 +165,9 @@ export async function acceptInviteAsNewUser(
 	input: { name: string; password: string },
 ) {
 	const invite = await resolveInvite(token);
-	if (!invite) throw new InviteError("This invite is invalid or has expired.");
+	if (!invite) throw new DmsError("This invite is invalid or has expired.");
 	if (await hasAccount(invite.email)) {
-		throw new InviteError("An account already exists. Sign in to accept.");
+		throw new DmsError("An account already exists. Sign in to accept.");
 	}
 
 	const { user: newUser } = await auth.api.signUpEmail({
@@ -197,7 +187,7 @@ export async function acceptInviteAsNewUser(
 /** Accepts an invite for someone who is already signed in. */
 export async function acceptInviteAsExistingUser(token: string, actor: Actor) {
 	const invite = await resolveInvite(token);
-	if (!invite) throw new InviteError("This invite is invalid or has expired.");
+	if (!invite) throw new DmsError("This invite is invalid or has expired.");
 	if (normalizeEmail(actor.email) !== invite.email) {
 		throw new ForbiddenError(
 			`This invite was sent to ${invite.email}. Sign in with that account to accept it.`,
@@ -206,7 +196,7 @@ export async function acceptInviteAsExistingUser(token: string, actor: Actor) {
 
 	// Never touch the owner's role.
 	if (invite.kind === "account" && invite.role === "admin" && actor.role === "owner") {
-		throw new InviteError("The owner already has full access.");
+		throw new DmsError("The owner already has full access.");
 	}
 
 	await markAccepted(invite, actor.id);

@@ -92,7 +92,8 @@ export const document = pgTable(
 			.defaultNow()
 			.$onUpdate(() => new Date())
 			.notNull(),
-		// Soft delete: the Spaces object is removed later by a cleanup job.
+		// Set on delete. The file is removed from Spaces immediately; the row stays
+		// so the activity log can still refer to it.
 		deletedAt: timestamp("deleted_at"),
 	},
 	(table) => [

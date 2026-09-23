@@ -7,6 +7,7 @@ import {
 	type document,
 } from "@/lib/db/schema";
 import type { UserRole } from "@/lib/auth";
+import { ForbiddenError } from "@/lib/dms/errors";
 
 export type AdminRight = keyof AdminRights;
 
@@ -111,13 +112,6 @@ export async function canAccessDocument(
 	});
 	if (!share) return false;
 	return action === "view" || share.access === "download";
-}
-
-export class ForbiddenError extends Error {
-	constructor(message = "You don't have permission to do that.") {
-		super(message);
-		this.name = "ForbiddenError";
-	}
 }
 
 export function assertCan(actor: Actor, right: AdminRight) {

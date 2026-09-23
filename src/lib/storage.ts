@@ -1,6 +1,7 @@
 import {
 	DeleteObjectCommand,
 	GetObjectCommand,
+	HeadObjectCommand,
 	PutObjectCommand,
 	S3Client,
 } from "@aws-sdk/client-s3";
@@ -79,4 +80,18 @@ export async function getDownloadUrl(
 export async function deleteObject(key: string) {
 	assertInPrefix(key);
 	await s3.send(new DeleteObjectCommand({ Bucket: BUCKET, Key: key }));
+}
+
+/** Size and type of an uploaded object, or null if it doesn't exist. */
+export async function headObject(key: string) {
+	assertInPrefix(key);
+	try {
+		const head = await s3.send(
+			new HeadObjectCommand({ Bucket: BUCKET, Key: key }),
+		);
+		return { size: head.ContentLength ?? 0, contentType: head.ContentType };
+	} catch (error) {
+		if ((error as { name?: string }).name === "NotFound") return null;
+		throw error;
+	}
 }
