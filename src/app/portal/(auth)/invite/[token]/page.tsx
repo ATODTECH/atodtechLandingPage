@@ -93,7 +93,7 @@ export default async function InvitePage({
 				</p>
 				<Link
 					href={signInHref}
-					className="flex h-10 items-center justify-center rounded-full bg-brand-accent text-sm font-medium text-white hover:bg-brand-accent/90"
+					className="flex h-11.5 items-center justify-center rounded-lg bg-brand-accent text-sm font-medium text-white hover:bg-brand-accent/90"
 				>
 					Sign in to continue
 				</Link>

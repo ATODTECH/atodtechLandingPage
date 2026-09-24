@@ -10,6 +10,7 @@ import {
 	renameDocumentAction,
 	setVisibilityAction,
 } from "@/app/portal/actions";
+import { FormField } from "@/components/form/form-field";
 import { LoadingButton } from "@/components/form/loading-button";
 import { dialogClassName } from "@/components/portal/ui";
 import { Button } from "@/components/ui/button";
@@ -22,7 +23,6 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 
 const actionButton =
 	"h-9 w-full cursor-pointer justify-start gap-2 rounded-lg border-white/15 bg-white/5 px-3 text-white hover:bg-white/10";
@@ -119,20 +119,20 @@ export function DocumentActions({
 							<DialogHeader>
 								<DialogTitle>Rename document</DialogTitle>
 							</DialogHeader>
-							<Input
+							<FormField
+								id="rename-document"
 								name="name"
+								label="Document name"
 								defaultValue={name}
 								required
 								maxLength={255}
-								aria-label="Document name"
-								className="h-10"
 								autoFocus
 							/>
-							<DialogFooter className="border-white/10 bg-white/5">
+							<DialogFooter className="rounded-b-lg border-white/10 bg-white/5">
 								<LoadingButton
 									type="submit"
 									loading={busy === "rename"}
-									className="rounded-full bg-brand-accent text-white hover:bg-brand-accent/90"
+									className="rounded-lg bg-brand-accent text-white hover:bg-brand-accent/90"
 								>
 									Save
 								</LoadingButton>
@@ -162,10 +162,10 @@ export function DocumentActions({
 								it&rsquo;s shared with will lose access. This can&rsquo;t be undone.
 							</DialogDescription>
 						</DialogHeader>
-						<DialogFooter className="border-white/10 bg-white/5">
+						<DialogFooter className="rounded-b-lg border-white/10 bg-white/5">
 							<Button
 								variant="outline"
-								className="cursor-pointer rounded-full"
+								className="cursor-pointer rounded-lg"
 								onClick={() => setDeleteOpen(false)}
 							>
 								Cancel
@@ -174,7 +174,7 @@ export function DocumentActions({
 								variant="destructive"
 								loading={busy === "delete"}
 								onClick={remove}
-								className="rounded-full"
+								className="rounded-lg"
 							>
 								Delete document
 							</LoadingButton>

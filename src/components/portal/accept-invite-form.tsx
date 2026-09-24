@@ -3,9 +3,8 @@
 import { useState } from "react";
 
 import { acceptInviteAction } from "@/app/portal/actions";
+import { FormField } from "@/components/form/form-field";
 import { LoadingButton } from "@/components/form/loading-button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 /**
  * Accepts an invite. With `createAccount`, also asks for a name and password
@@ -56,50 +55,30 @@ export function AcceptInviteForm({
 		<form onSubmit={onSubmit} className="flex flex-col gap-5">
 			{createAccount ? (
 				<>
-					<div className="flex flex-col gap-2">
-						<Label htmlFor="invite-email">Email</Label>
-						<Input
-							id="invite-email"
-							value={email}
-							readOnly
-							disabled
-							className="h-10"
-						/>
-					</div>
-					<div className="flex flex-col gap-2">
-						<Label htmlFor="name">Your name</Label>
-						<Input
-							id="name"
-							name="name"
-							autoComplete="name"
-							required
-							className="h-10"
-						/>
-					</div>
-					<div className="flex flex-col gap-2">
-						<Label htmlFor="password">Password</Label>
-						<Input
-							id="password"
-							name="password"
-							type="password"
-							autoComplete="new-password"
-							minLength={8}
-							required
-							className="h-10"
-						/>
-						<p className="text-xs text-white/40">At least 8 characters.</p>
-					</div>
-					<div className="flex flex-col gap-2">
-						<Label htmlFor="confirm">Confirm password</Label>
-						<Input
-							id="confirm"
-							name="confirm"
-							type="password"
-							autoComplete="new-password"
-							required
-							className="h-10"
-						/>
-					</div>
+					<FormField
+						id="invite-email"
+						label="Email"
+						value={email}
+						readOnly
+						disabled
+					/>
+					<FormField id="name" label="Your name" autoComplete="name" required />
+					<FormField
+						id="password"
+						label="Password"
+						type="password"
+						autoComplete="new-password"
+						minLength={8}
+						required
+						hint="At least 8 characters."
+					/>
+					<FormField
+						id="confirm"
+						label="Confirm password"
+						type="password"
+						autoComplete="new-password"
+						required
+					/>
 				</>
 			) : null}
 			{error ? (
@@ -110,7 +89,7 @@ export function AcceptInviteForm({
 			<LoadingButton
 				type="submit"
 				loading={loading}
-				className="h-10 rounded-full bg-brand-accent text-white hover:bg-brand-accent/90"
+				className="h-11.5 rounded-lg bg-brand-accent text-white hover:bg-brand-accent/90"
 			>
 				{cta}
 			</LoadingButton>

@@ -23,6 +23,7 @@ export default async function TeamPage() {
 				invites={invites}
 				currentUserId={actor.id}
 				grantable={actor.rights}
+				canRemoveUsers={actor.role === "owner"}
 			/>
 		</>
 	);

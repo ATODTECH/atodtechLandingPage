@@ -79,6 +79,9 @@ export const ACTION_LABELS: Record<string, string> = {
 	"user.invite": "Invited user",
 	"user.invite_revoke": "Cancelled invite",
 	"user.join": "Joined",
+	"user.remove": "Removed user",
+	"user.password_change": "Changed password",
+	"user.password_reset": "Reset password",
 };
 
 /** One-line human summary of an activity entry's details. */
@@ -103,6 +106,9 @@ export function describeActivity(
 			return `${str("email")} as ${str("role")}`;
 		case "user.invite_revoke":
 		case "user.join":
+		case "user.remove":
+		case "user.password_change":
+		case "user.password_reset":
 			return str("email");
 		case "admin.add":
 		case "admin.update_permissions":

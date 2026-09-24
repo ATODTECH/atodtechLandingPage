@@ -30,6 +30,7 @@ export default async function PortalLayout({
 	if (can(actor, "canViewActivity")) {
 		items.push({ key: "activity", label: "Activity", href: "/portal/activity" });
 	}
+	items.push({ key: "account", label: "Account", href: "/portal/account" });
 
 	return (
 		<div className="dark flex min-h-screen flex-col bg-page text-white">

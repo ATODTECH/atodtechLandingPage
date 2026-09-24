@@ -365,6 +365,7 @@ export async function shareDocument(
 		kind: "share",
 		to: email,
 		inviterName: actor.name,
+		inviterEmail: actor.email,
 		documentName: doc.name,
 		url: inviteUrl(token),
 	});

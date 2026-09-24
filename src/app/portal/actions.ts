@@ -6,6 +6,7 @@ import { headers } from "next/headers";
 import { APIError } from "better-auth/api";
 import { auth } from "@/lib/auth";
 import type { AdminRights } from "@/lib/db/schema";
+import { logActivity } from "@/lib/dms/activity";
 import * as clients from "@/lib/dms/clients";
 import * as documents from "@/lib/dms/documents";
 import { DmsError } from "@/lib/dms/errors";
@@ -149,6 +150,51 @@ export async function removeAdminAction(userId: string) {
 	return run(async () => {
 		await team.removeAdmin(await requireActor(), userId);
 		revalidatePath("/portal/team");
+	});
+}
+
+export async function removeUserAction(userId: string) {
+	return run(async () => {
+		await team.removeUser(await requireActor(), userId);
+		revalidatePath("/portal", "layout");
+	});
+}
+
+// Account
+
+export async function changePasswordAction(input: {
+	currentPassword: string;
+	newPassword: string;
+	signOutOtherDevices: boolean;
+}) {
+	return run(async () => {
+		const actor = await requireActor();
+		if (input.newPassword === input.currentPassword) {
+			throw new DmsError("Choose a password different from your current one.");
+		}
+		try {
+			await auth.api.changePassword({
+				body: {
+					currentPassword: input.currentPassword,
+					newPassword: input.newPassword,
+					revokeOtherSessions: input.signOutOtherDevices,
+				},
+				headers: await headers(),
+			});
+		} catch (error) {
+			if (error instanceof APIError && error.body?.code === "INVALID_PASSWORD") {
+				throw new DmsError("Your current password is incorrect.");
+			}
+			throw error;
+		}
+		await logActivity({
+			actorId: actor.id,
+			action: "user.password_change",
+			metadata: {
+				email: actor.email,
+				signedOutOtherDevices: input.signOutOtherDevices,
+			},
+		});
 	});
 }
 

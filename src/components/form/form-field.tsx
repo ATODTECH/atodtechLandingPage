@@ -15,6 +15,13 @@ type FormFieldProps = {
 	value?: string;
 	defaultValue?: string;
 	disabled?: boolean;
+	readOnly?: boolean;
+	required?: boolean;
+	autoComplete?: string;
+	autoFocus?: boolean;
+	minLength?: number;
+	maxLength?: number;
+	hint?: string;
 	error?: string;
 	onChange?: React.ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement>;
 	onBlur?: React.FocusEventHandler<HTMLInputElement | HTMLTextAreaElement>;
@@ -22,6 +29,10 @@ type FormFieldProps = {
 	labelClassName?: string;
 	fieldClassName?: string;
 };
+
+// dark:bg-white keeps fields white inside `.dark` containers (e.g. the portal).
+const fieldBase =
+	"rounded-lg bg-white text-[#6D758F] dark:bg-white dark:disabled:bg-white/80";
 
 export function FormField({
 	id,
@@ -33,6 +44,13 @@ export function FormField({
 	value,
 	defaultValue,
 	disabled,
+	readOnly,
+	required,
+	autoComplete,
+	autoFocus,
+	minLength,
+	maxLength,
+	hint,
 	error,
 	onChange,
 	onBlur,
@@ -41,6 +59,25 @@ export function FormField({
 	fieldClassName,
 }: FormFieldProps) {
 	const errorId = error ? `${id}-error` : undefined;
+	const hintId = hint ? `${id}-hint` : undefined;
+	const describedBy = [errorId, hintId].filter(Boolean).join(" ") || undefined;
+	const shared = {
+		id,
+		name: name ?? id,
+		placeholder,
+		value,
+		defaultValue,
+		disabled,
+		readOnly,
+		required,
+		autoFocus,
+		minLength,
+		maxLength,
+		onChange,
+		onBlur,
+		"aria-invalid": !!error,
+		"aria-describedby": describedBy,
+	};
 
 	return (
 		<div className={cn("flex flex-col gap-2", className)}>
@@ -52,38 +89,23 @@ export function FormField({
 			</Label>
 			{type === "textarea" ? (
 				<Textarea
-					id={id}
-					name={name ?? id}
+					{...shared}
 					rows={rows}
-					placeholder={placeholder}
-					value={value}
-					defaultValue={defaultValue}
-					disabled={disabled}
-					onChange={onChange}
-					onBlur={onBlur}
-					aria-invalid={!!error}
-					aria-describedby={errorId}
-					className={cn(
-						"min-h-23 resize-none rounded-lg bg-white text-[#6D758F]",
-						fieldClassName,
-					)}
+					className={cn("min-h-23 resize-none", fieldBase, fieldClassName)}
 				/>
 			) : (
 				<Input
-					id={id}
-					name={name ?? id}
+					{...shared}
 					type={type}
-					placeholder={placeholder}
-					value={value}
-					defaultValue={defaultValue}
-					disabled={disabled}
-					onChange={onChange}
-					onBlur={onBlur}
-					aria-invalid={!!error}
-					aria-describedby={errorId}
-					className={cn("h-11.5 rounded-lg bg-white text-[#6D758F]", fieldClassName)}
+					autoComplete={autoComplete}
+					className={cn("h-11.5", fieldBase, fieldClassName)}
 				/>
 			)}
+			{hint && !error ? (
+				<p id={hintId} className="text-xs text-white/50">
+					{hint}
+				</p>
+			) : null}
 			{error ? (
 				<p id={errorId} className="text-xs text-destructive">
 					{error}

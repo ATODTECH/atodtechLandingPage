@@ -3,6 +3,7 @@ import { and, asc, desc, eq, gt } from "drizzle-orm";
 import { db } from "@/lib/db";
 import {
 	adminPermission,
+	documentShare,
 	user,
 	userInvite,
 	type AdminRights,
@@ -122,5 +123,48 @@ export async function removeAdmin(actor: Actor, userId: string) {
 		action: "admin.remove",
 		targetUserId: userId,
 		metadata: { email: target.email },
+	});
+}
+
+/**
+ * Deletes an admin or client entirely. Owner only. Their sessions, sign-in
+ * details, admin rights and document access go with the account, and any
+ * open invites to their email are cancelled, so they can be invited again
+ * from scratch later. Activity log entries stay, shown as "Deleted user".
+ */
+export async function removeUser(actor: Actor, userId: string) {
+	if (actor.role !== "owner") {
+		throw new ForbiddenError("Only the owner can remove people.");
+	}
+	if (userId === actor.id) {
+		throw new ForbiddenError("You can't remove yourself.");
+	}
+	const target = await db.query.user.findFirst({ where: eq(user.id, userId) });
+	if (!target) throw new DmsError("User not found.");
+	if (target.role === "owner") {
+		throw new ForbiddenError("The owner can't be removed.");
+	}
+
+	// Logged first: the entry keeps their name and email after the row is gone.
+	await logActivity({
+		actorId: actor.id,
+		action: "user.remove",
+		metadata: { email: target.email, name: target.name, role: target.role },
+	});
+
+	await db.transaction(async (tx) => {
+		// Old invite links to their email must stop working.
+		await tx
+			.update(userInvite)
+			.set({ status: "revoked" })
+			.where(
+				and(eq(userInvite.email, target.email), eq(userInvite.status, "pending")),
+			);
+		// Shares still waiting for them to accept (accepted ones cascade below).
+		await tx
+			.delete(documentShare)
+			.where(eq(documentShare.email, target.email));
+		// Cascades to sessions (signing them out), accounts and admin rights.
+		await tx.delete(user).where(eq(user.id, userId));
 	});
 }

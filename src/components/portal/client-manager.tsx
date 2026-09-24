@@ -10,9 +10,9 @@ import {
 	deleteClientAction,
 	renameClientAction,
 } from "@/app/portal/actions";
+import { FormField } from "@/components/form/form-field";
 import { LoadingButton } from "@/components/form/loading-button";
 import { EmptyState } from "@/components/portal/ui";
-import { Input } from "@/components/ui/input";
 import { formatDate } from "@/lib/dms/format";
 
 type ClientRow = {
@@ -71,19 +71,21 @@ export function ClientManager({
 	return (
 		<>
 			{canManage ? (
-				<form onSubmit={create} className="mb-6 flex max-w-md gap-2">
-					<Input
+				<form onSubmit={create} className="mb-6 flex max-w-md items-end gap-2">
+					<FormField
+						id="new-client"
 						name="name"
+						label="New client name"
+						labelClassName="sr-only"
+						className="flex-1"
 						required
 						maxLength={120}
 						placeholder="Client name, e.g. Kiddiedu"
-						aria-label="New client name"
-						className="h-9"
 					/>
 					<LoadingButton
 						type="submit"
 						loading={creating}
-						className="h-9 rounded-full bg-brand-accent px-4 text-white hover:bg-brand-accent/90"
+						className="h-11.5 rounded-lg bg-brand-accent px-4 text-white hover:bg-brand-accent/90"
 					>
 						<Plus aria-hidden /> Add
 					</LoadingButton>
@@ -97,7 +99,7 @@ export function ClientManager({
 						: "An admin with client access can add clients."}
 				</EmptyState>
 			) : (
-				<ul className="divide-y divide-white/5 overflow-hidden rounded-xl border border-white/10">
+				<ul className="divide-y divide-white/5 overflow-hidden rounded-lg border border-white/10">
 					{clients.map((c) => (
 						<li key={c.id} className="flex items-center gap-3 px-4 py-3">
 							{editingId === c.id ? (
@@ -105,13 +107,16 @@ export function ClientManager({
 									onSubmit={(e) => rename(e, c.id)}
 									className="flex flex-1 items-center gap-2"
 								>
-									<Input
+									<FormField
+										id={`client-name-${c.id}`}
 										name="name"
+										label="Client name"
+										labelClassName="sr-only"
+										className="flex-1"
+										fieldClassName="h-9"
 										defaultValue={c.name}
 										required
 										maxLength={120}
-										aria-label="Client name"
-										className="h-8"
 										autoFocus
 									/>
 									<button

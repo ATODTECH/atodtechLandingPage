@@ -44,6 +44,9 @@ export const activityAction = pgEnum("activity_action", [
 	"user.invite",
 	"user.invite_revoke",
 	"user.join",
+	"user.remove",
+	"user.password_change",
+	"user.password_reset",
 ]);
 export const inviteRole = pgEnum("invite_role", ["admin", "client"]);
 

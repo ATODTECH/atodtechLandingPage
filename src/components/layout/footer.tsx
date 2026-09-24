@@ -19,6 +19,7 @@ const footerColumns = [
 			{ label: "Projects", href: "/projects" },
 			{ label: "About Us", href: "/about" },
 			{ label: "FAQs", href: "/faqs" },
+			{ label: "Portal", href: "/portal/sign-in" },
 		],
 	},
 	{
@@ -43,10 +44,15 @@ const footerColumns = [
 	},
 ];
 
-const socialIcons = [
+// Profiles without an href yet link to "#".
+const socialIcons: { src: typeof socialFacebook; label: string; href?: string }[] = [
 	{ src: socialFacebook, label: "Facebook" },
 	{ src: socialTwitter, label: "Twitter" },
-	{ src: socialInstagram, label: "Instagram" },
+	{
+		src: socialInstagram,
+		label: "Instagram",
+		href: "https://www.instagram.com/atod_tech?stkn=MXJvZmxhYnZxeDAweQ%3D%3D",
+	},
 	{ src: socialLinkedin, label: "LinkedIn" },
 	{ src: socialYoutube, label: "YouTube" },
 ];
@@ -69,15 +75,18 @@ export function Footer() {
 							and AI automation solutions for organisations in the United
 							States, Nigeria and beyond.
 						</p>
-						<div className="mt-8 flex items-start gap-4">
+						<div className="mt-8 flex items-center gap-5">
 							{socialIcons.map((icon) => (
 								<a
 									key={icon.label}
-									href="#"
+									href={icon.href ?? "#"}
 									aria-label={icon.label}
+									{...(icon.href
+										? { target: "_blank", rel: "noopener noreferrer" }
+										: {})}
 									className="cursor-pointer transition-opacity hover:opacity-70"
 								>
-									<Image src={icon.src} alt="" className="size-6" />
+									<Image src={icon.src} alt="" className="size-8" />
 								</a>
 							))}
 						</div>

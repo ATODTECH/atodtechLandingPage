@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 
 /** Dialogs render in a portal outside the portal's `.dark` wrapper. */
 export const dialogClassName =
-	"dark bg-[#0f1526] text-white ring-white/10 sm:max-w-md";
+	"dark rounded-lg bg-[#0f1526] text-white ring-white/10 sm:max-w-md";
 
 export function PageHeader({
 	title,
@@ -38,21 +38,6 @@ export function PageHeader({
 	);
 }
 
-export function NativeSelect({
-	className,
-	...props
-}: React.ComponentProps<"select">) {
-	return (
-		<select
-			className={cn(
-				"h-9 rounded-lg border border-white/15 bg-white/5 px-2.5 text-sm text-white outline-none focus-visible:border-white/40 [&>option]:bg-[#0f1526]",
-				className,
-			)}
-			{...props}
-		/>
-	);
-}
-
 export function Badge({
 	tone = "neutral",
 	className,
@@ -69,7 +54,7 @@ export function Badge({
 	return (
 		<span
 			className={cn(
-				"inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium",
+				"inline-flex items-center gap-1 rounded-lg border px-2 py-0.5 text-xs font-medium",
 				tones[tone],
 				className,
 			)}
@@ -86,7 +71,7 @@ export function EmptyState({
 	children?: React.ReactNode;
 }) {
 	return (
-		<div className="rounded-xl border border-dashed border-white/15 px-6 py-16 text-center">
+		<div className="rounded-lg border border-dashed border-white/15 px-6 py-16 text-center">
 			<p className="font-medium">{title}</p>
 			{children ? (
 				<div className="mt-2 text-sm text-white/60">{children}</div>

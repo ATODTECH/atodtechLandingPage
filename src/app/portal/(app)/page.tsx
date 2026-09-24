@@ -56,7 +56,7 @@ export default async function DocumentsPage({
 							: "Documents shared with you will appear here."}
 				</EmptyState>
 			) : (
-				<div className="overflow-hidden rounded-xl border border-white/10">
+				<div className="overflow-hidden rounded-lg border border-white/10">
 					<table className="w-full text-left text-sm">
 						<thead className="border-b border-white/10 bg-white/[0.03] text-xs text-white/50 uppercase">
 							<tr>

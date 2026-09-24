@@ -75,7 +75,7 @@ export default async function DocumentPage({
 					{doc.canDownload ? (
 						<a
 							href={`${fileUrl}?mode=download`}
-							className="inline-flex h-9 items-center gap-2 rounded-full bg-brand-accent px-4 text-sm font-medium text-white hover:bg-brand-accent/90"
+							className="inline-flex h-9 items-center gap-2 rounded-lg bg-brand-accent px-4 text-sm font-medium text-white hover:bg-brand-accent/90"
 						>
 							<Download className="size-4" aria-hidden /> Download
 						</a>
@@ -84,7 +84,7 @@ export default async function DocumentPage({
 			</div>
 
 			<div className="grid gap-6 lg:grid-cols-[1fr_320px]">
-				<div className="min-h-[60vh] overflow-hidden rounded-xl border border-white/10 bg-black/30">
+				<div className="min-h-[60vh] overflow-hidden rounded-lg border border-white/10 bg-black/30">
 					{kind === "pdf" || kind === "text" ? (
 						<iframe
 							src={fileUrl}
@@ -138,7 +138,7 @@ export default async function DocumentPage({
 					{shares ? <SharePanel documentId={doc.id} shares={shares} /> : null}
 
 					{activity ? (
-						<section className="rounded-xl border border-white/10 p-4">
+						<section className="rounded-lg border border-white/10 p-4">
 							<div className="flex items-center justify-between">
 								<h2 className="font-medium">Recent activity</h2>
 								<Link

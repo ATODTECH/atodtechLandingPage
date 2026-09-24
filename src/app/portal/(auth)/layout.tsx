@@ -16,9 +16,9 @@ export default function PortalAuthLayout({
 	return (
 		<div className="dark flex min-h-screen flex-col items-center justify-center bg-page px-4 py-12 text-white">
 			<Link href="/" className="mb-8">
-				<AtodBrandLogo aria-label="Atod Tech" className="h-16 w-auto" />
+				<AtodBrandLogo aria-label="Atod Tech" className="h-20 w-auto" />
 			</Link>
-			<div className="w-full max-w-md rounded-xl border border-white/10 bg-[#0f1526] p-6 sm:p-8">
+			<div className="w-full max-w-md rounded-lg border border-white/10 bg-[#0f1526] p-6 sm:p-8">
 				{children}
 			</div>
 		</div>

@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { EmptyState, NativeSelect, PageHeader } from "@/components/portal/ui";
+import { SelectField } from "@/components/form/select-field";
+import { EmptyState, PageHeader } from "@/components/portal/ui";
 import { activityAction } from "@/lib/db/schema";
 import { listActivity, type ActivityAction } from "@/lib/dms/activity";
 import {
@@ -54,17 +55,23 @@ export default async function ActivityPage({
 
 			<form className="mb-4 flex flex-wrap items-center gap-2">
 				{documentId ? <input type="hidden" name="document" value={documentId} /> : null}
-				<NativeSelect name="action" defaultValue={action ?? ""} aria-label="Filter by action">
-					<option value="">All actions</option>
-					{activityAction.enumValues.map((a) => (
-						<option key={a} value={a}>
-							{ACTION_LABELS[a] ?? a}
-						</option>
-					))}
-				</NativeSelect>
+				<SelectField
+					id="action"
+					label="Filter by action"
+					labelClassName="sr-only"
+					className="w-full sm:w-64"
+					defaultValue={action ?? "all"}
+					options={[
+						{ value: "all", label: "All actions" },
+						...activityAction.enumValues.map((a) => ({
+							value: a,
+							label: ACTION_LABELS[a] ?? a,
+						})),
+					]}
+				/>
 				<button
 					type="submit"
-					className="h-9 cursor-pointer rounded-lg border border-white/15 bg-white/5 px-3 text-sm hover:bg-white/10"
+					className="h-11.5 cursor-pointer rounded-lg border border-white/15 bg-white/5 px-4 text-sm hover:bg-white/10"
 				>
 					Filter
 				</button>
@@ -78,7 +85,7 @@ export default async function ActivityPage({
 			{rows.length === 0 ? (
 				<EmptyState title="No activity found" />
 			) : (
-				<div className="overflow-x-auto rounded-xl border border-white/10">
+				<div className="overflow-x-auto rounded-lg border border-white/10">
 					<table className="w-full text-left text-sm">
 						<thead className="border-b border-white/10 bg-white/[0.03] text-xs text-white/50 uppercase">
 							<tr>

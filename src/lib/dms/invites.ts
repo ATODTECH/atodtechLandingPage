@@ -63,6 +63,7 @@ export async function createUserInvite(
 	await sendInviteEmail({
 		to: email,
 		inviterName: actor.name,
+		inviterEmail: actor.email,
 		kind: input.role === "admin" ? "admin" : "account",
 		url: inviteUrl(token),
 	});

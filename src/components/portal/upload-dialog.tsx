@@ -8,7 +8,8 @@ import { toast } from "sonner";
 
 import { confirmUploadAction, requestUploadAction } from "@/app/portal/actions";
 import { LoadingButton } from "@/components/form/loading-button";
-import { NativeSelect, dialogClassName } from "@/components/portal/ui";
+import { SelectField } from "@/components/form/select-field";
+import { dialogClassName } from "@/components/portal/ui";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -145,7 +146,7 @@ export function UploadDialog({
 		>
 			<DialogTrigger
 				render={
-					<Button className="h-9 cursor-pointer rounded-full bg-brand-accent px-4 text-white hover:bg-brand-accent/90" />
+					<Button className="h-9 cursor-pointer rounded-lg bg-brand-accent px-4 text-white hover:bg-brand-accent/90" />
 				}
 			>
 				<Upload aria-hidden />
@@ -169,27 +170,20 @@ export function UploadDialog({
 					</p>
 				) : (
 					<div className="flex flex-col gap-4">
-						<div className="flex flex-col gap-2">
-							<Label htmlFor="upload-client">Client</Label>
-							<NativeSelect
-								id="upload-client"
-								value={clientId}
-								onChange={(e) => setClientId(e.target.value)}
-								disabled={uploading}
-							>
-								<option value="" disabled>
-									Choose a client…
-								</option>
-								{clients.map((c) => (
-									<option key={c.id} value={c.id}>
-										{c.name}
-									</option>
-								))}
-							</NativeSelect>
-						</div>
+						<SelectField
+							id="upload-client"
+							label="Client"
+							placeholder="Choose a client…"
+							options={clients.map((c) => ({ value: c.id, label: c.name }))}
+							value={clientId}
+							onValueChange={setClientId}
+							disabled={uploading}
+						/>
 
 						<div className="flex flex-col gap-2">
-							<Label htmlFor="upload-files">Files</Label>
+							<Label htmlFor="upload-files" className="text-sm text-[#EAEAEA]">
+								Files
+							</Label>
 							<input
 								id="upload-files"
 								type="file"
@@ -204,7 +198,7 @@ export function UploadDialog({
 										})),
 									)
 								}
-								className="text-sm text-white/70 file:mr-3 file:cursor-pointer file:rounded-full file:border-0 file:bg-white/10 file:px-3 file:py-1.5 file:text-sm file:text-white hover:file:bg-white/15"
+								className="text-sm text-white/70 file:mr-3 file:cursor-pointer file:rounded-lg file:border-0 file:bg-white/10 file:px-3 file:py-1.5 file:text-sm file:text-white hover:file:bg-white/15"
 							/>
 						</div>
 
@@ -227,7 +221,7 @@ export function UploadDialog({
 											) : null}
 										</div>
 										{f.status === "uploading" ? (
-											<div className="mt-2 h-1 overflow-hidden rounded-full bg-white/10">
+											<div className="mt-2 h-1 overflow-hidden rounded-lg bg-white/10">
 												<div
 													className="h-full bg-brand-accent transition-[width]"
 													style={{ width: `${Math.round(f.progress * 100)}%` }}
@@ -244,10 +238,10 @@ export function UploadDialog({
 					</div>
 				)}
 
-				<DialogFooter className="border-white/10 bg-white/5">
+				<DialogFooter className="rounded-b-lg border-white/10 bg-white/5">
 					{allDone ? (
 						<Button
-							className="cursor-pointer rounded-full"
+							className="cursor-pointer rounded-lg"
 							onClick={() => setOpen(false)}
 						>
 							Done
@@ -258,7 +252,7 @@ export function UploadDialog({
 							loadingText="Uploading…"
 							disabled={!clientId || files.length === 0}
 							onClick={uploadAll}
-							className="rounded-full bg-brand-accent text-white hover:bg-brand-accent/90"
+							className="rounded-lg bg-brand-accent text-white hover:bg-brand-accent/90"
 						>
 							{files.length > 1 ? `Upload ${files.length} files` : "Upload"}
 						</LoadingButton>
