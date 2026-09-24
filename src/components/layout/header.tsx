@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronDown, Menu } from "lucide-react";
+import { ChevronDown, LogIn, Menu } from "lucide-react";
 
 import { AtodBrandLogo } from "@/assets";
 import { FancyButton } from "@/components/shared/fancy-button";
@@ -16,6 +16,8 @@ import {
 	SheetTrigger,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+
+const LOGIN_HREF = "/portal/sign-in";
 
 const approachLinks = [
 	{ label: "Solutions", href: "/solutions" },
@@ -137,7 +139,14 @@ export function Header() {
 					</nav>
 				</div>
 
-				<div className="hidden xl:block">
+				<div className="hidden items-center gap-6 xl:flex">
+					<Link
+						href={LOGIN_HREF}
+						className="flex cursor-pointer items-center gap-2 whitespace-nowrap text-base leading-6 text-nav-muted transition-colors hover:text-white"
+					>
+						<LogIn className="size-4" aria-hidden />
+						Login
+					</Link>
 					<FancyButton href="/contact">Start Your Project</FancyButton>
 				</div>
 
@@ -202,6 +211,13 @@ export function Header() {
 									</Link>
 								),
 							)}
+							<Link
+								href={LOGIN_HREF}
+								className="flex cursor-pointer items-center gap-2 text-base leading-6 text-nav-muted transition-colors hover:text-white"
+							>
+								<LogIn className="size-4" aria-hidden />
+								Login
+							</Link>
 							<FancyButton href="/contact" className="self-start">
 								Start Your Project
 							</FancyButton>

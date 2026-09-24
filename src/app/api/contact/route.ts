@@ -37,7 +37,10 @@ export async function POST(request: Request) {
 				{ status: 400 },
 			);
 		}
-		return NextResponse.json({ error: "Invalid form data" }, { status: 400 });
+		return NextResponse.json(
+			{ error: "Invalid form data" },
+			{ status: 400 },
+		);
 	}
 
 	if (values.atodHpField) {
