@@ -82,6 +82,8 @@ export const ACTION_LABELS: Record<string, string> = {
 	"user.remove": "Removed user",
 	"user.password_change": "Changed password",
 	"user.password_reset": "Reset password",
+	"client.member_add": "Added to client",
+	"client.member_remove": "Removed from client",
 };
 
 /** One-line human summary of an activity entry's details. */
@@ -110,6 +112,9 @@ export function describeActivity(
 		case "user.password_change":
 		case "user.password_reset":
 			return str("email");
+		case "client.member_add":
+		case "client.member_remove":
+			return `${targetEmail ?? str("email")} · ${str("client")}`;
 		case "admin.add":
 		case "admin.update_permissions":
 		case "admin.remove":

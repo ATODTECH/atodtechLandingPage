@@ -8,6 +8,7 @@ import {
 	pgTable,
 	text,
 	timestamp,
+	primaryKey,
 	uniqueIndex,
 	uuid,
 } from "drizzle-orm/pg-core";
@@ -47,6 +48,8 @@ export const activityAction = pgEnum("activity_action", [
 	"user.remove",
 	"user.password_change",
 	"user.password_reset",
+	"client.member_add",
+	"client.member_remove",
 ]);
 export const inviteRole = pgEnum("invite_role", ["admin", "client"]);
 
@@ -74,6 +77,24 @@ export const client = pgTable("client", {
 		.notNull(),
 });
 
+/** Which client company a client user belongs to. A user can be in several. */
+export const clientMember = pgTable(
+	"client_member",
+	{
+		userId: text("user_id")
+			.notNull()
+			.references(() => user.id, { onDelete: "cascade" }),
+		clientId: uuid("client_id")
+			.notNull()
+			.references(() => client.id, { onDelete: "cascade" }),
+		createdAt: timestamp("created_at").defaultNow().notNull(),
+	},
+	(table) => [
+		primaryKey({ columns: [table.userId, table.clientId] }),
+		index("client_member_client_id_idx").on(table.clientId),
+	],
+);
+
 export const document = pgTable(
 	"document",
 	{
@@ -90,6 +111,9 @@ export const document = pgTable(
 		uploadedBy: text("uploaded_by").references(() => user.id, {
 			onDelete: "set null",
 		}),
+		// Uploaded by a client user (not staff). Visible to everyone at that
+		// client company, unlike staff uploads, which need sharing.
+		uploadedByClient: boolean("uploaded_by_client").default(false).notNull(),
 		createdAt: timestamp("created_at").defaultNow().notNull(),
 		updatedAt: timestamp("updated_at")
 			.defaultNow()
@@ -171,6 +195,10 @@ export const userInvite = pgTable(
 		role: inviteRole("role").default("client").notNull(),
 		// Rights granted on acceptance when role is "admin".
 		adminRights: jsonb("admin_rights").$type<AdminRights>(),
+		// Company a "client" invitee joins on acceptance.
+		clientId: uuid("client_id").references(() => client.id, {
+			onDelete: "set null",
+		}),
 		status: shareStatus("status").default("pending").notNull(),
 		tokenHash: text("token_hash").notNull().unique(),
 		invitedBy: text("invited_by").references(() => user.id, {
@@ -220,6 +248,15 @@ export const activityLog = pgTable(
 
 export const clientRelations = relations(client, ({ many }) => ({
 	documents: many(document),
+	members: many(clientMember),
+}));
+
+export const clientMemberRelations = relations(clientMember, ({ one }) => ({
+	user: one(user, { fields: [clientMember.userId], references: [user.id] }),
+	client: one(client, {
+		fields: [clientMember.clientId],
+		references: [client.id],
+	}),
 }));
 
 export const documentRelations = relations(document, ({ one, many }) => ({
@@ -245,6 +282,13 @@ export const adminPermissionRelations = relations(
 		}),
 	}),
 );
+
+export const userInviteRelations = relations(userInvite, ({ one }) => ({
+	client: one(client, {
+		fields: [userInvite.clientId],
+		references: [client.id],
+	}),
+}));
 
 export const activityLogRelations = relations(activityLog, ({ one }) => ({
 	actor: one(user, { fields: [activityLog.actorId], references: [user.id] }),

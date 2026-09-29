@@ -2,6 +2,7 @@ import { and, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import {
 	adminPermission,
+	clientMember,
 	documentShare,
 	type AdminRights,
 	type document,
@@ -36,6 +37,8 @@ export type Actor = {
 	name: string;
 	role: UserRole;
 	rights: AdminRights;
+	/** Client companies a client user belongs to. Empty for staff. */
+	clientIds: string[];
 };
 
 export async function loadActor(sessionUser: {
@@ -46,6 +49,7 @@ export async function loadActor(sessionUser: {
 }): Promise<Actor> {
 	const role = (sessionUser.role ?? "client") as UserRole;
 	let rights = NO_RIGHTS;
+	let clientIds: string[] = [];
 
 	if (role === "owner") {
 		rights = ALL_RIGHTS;
@@ -63,6 +67,12 @@ export async function loadActor(sessionUser: {
 				canViewActivity: row.canViewActivity,
 			};
 		}
+	} else {
+		const memberships = await db
+			.select({ clientId: clientMember.clientId })
+			.from(clientMember)
+			.where(eq(clientMember.userId, sessionUser.id));
+		clientIds = memberships.map((m) => m.clientId);
 	}
 
 	return {
@@ -71,6 +81,7 @@ export async function loadActor(sessionUser: {
 		name: sessionUser.name,
 		role,
 		rights,
+		clientIds,
 	};
 }
 
@@ -85,13 +96,27 @@ export function can(actor: Actor, right: AdminRight) {
 
 type DocumentRow = Pick<
 	typeof document.$inferSelect,
-	"id" | "visibility" | "status" | "deletedAt"
+	| "id"
+	| "clientId"
+	| "visibility"
+	| "status"
+	| "deletedAt"
+	| "uploadedBy"
+	| "uploadedByClient"
 >;
+
+/** Whether the actor is a member of this client company. */
+export function isMemberOf(actor: Actor, clientId: string) {
+	return actor.role === "client" && actor.clientIds.includes(clientId);
+}
 
 /**
  * Can this actor view or download a document?
  * - Staff (owner and admins) can see every document.
- * - Clients can see public documents, or ones shared with them and accepted.
+ * - Clients can see public documents, ones shared with them and accepted,
+ *   and anything uploaded by a client of a company they belong to (their
+ *   company's shared folder). Staff uploads to that company stay private
+ *   unless shared or made public.
  *   Downloading a shared document needs "download" access on the share.
  */
 export async function canAccessDocument(
@@ -102,6 +127,7 @@ export async function canAccessDocument(
 	if (doc.deletedAt || doc.status !== "ready") return false;
 	if (isStaff(actor)) return true;
 	if (doc.visibility === "public") return true;
+	if (doc.uploadedByClient && isMemberOf(actor, doc.clientId)) return true;
 
 	const share = await db.query.documentShare.findFirst({
 		where: and(
@@ -112,6 +138,29 @@ export async function canAccessDocument(
 	});
 	if (!share) return false;
 	return action === "view" || share.access === "download";
+}
+
+/** Staff with the upload right can upload anywhere; clients only to their companies. */
+export function canUploadTo(actor: Actor, clientId: string) {
+	return can(actor, "canUpload") || isMemberOf(actor, clientId);
+}
+
+/** A client's own upload, which they may rename and delete. */
+function isOwnClientUpload(actor: Actor, doc: DocumentRow) {
+	return (
+		actor.role === "client" &&
+		doc.uploadedByClient &&
+		doc.uploadedBy === actor.id &&
+		isMemberOf(actor, doc.clientId)
+	);
+}
+
+export function canRenameDocument(actor: Actor, doc: DocumentRow) {
+	return can(actor, "canUpload") || isOwnClientUpload(actor, doc);
+}
+
+export function canDeleteDocument(actor: Actor, doc: DocumentRow) {
+	return can(actor, "canDelete") || isOwnClientUpload(actor, doc);
 }
 
 export function assertCan(actor: Actor, right: AdminRight) {

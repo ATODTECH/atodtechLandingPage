@@ -1,5 +1,5 @@
 import "server-only";
-import { and, asc, count, eq, isNotNull, isNull, or } from "drizzle-orm";
+import { and, asc, count, eq, inArray, isNotNull, isNull, or } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { client, document } from "@/lib/db/schema";
 import { logActivity } from "@/lib/dms/activity";
@@ -7,9 +7,12 @@ import { DmsError } from "@/lib/dms/errors";
 import { isUuid } from "@/lib/dms/format";
 import { assertCan, isStaff, type Actor } from "@/lib/dms/permissions";
 
-/** Clients with how many live documents each has. Staff only. */
+/**
+ * Clients with how many live documents each has. Staff see every client;
+ * client users see only the companies they belong to.
+ */
 export async function listClients(actor: Actor) {
-	if (!isStaff(actor)) return [];
+	if (!isStaff(actor) && actor.clientIds.length === 0) return [];
 	return db
 		.select({
 			id: client.id,
@@ -26,6 +29,7 @@ export async function listClients(actor: Actor) {
 				isNull(document.deletedAt),
 			),
 		)
+		.where(isStaff(actor) ? undefined : inArray(client.id, actor.clientIds))
 		.groupBy(client.id)
 		.orderBy(asc(client.name));
 }

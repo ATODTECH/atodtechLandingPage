@@ -5,6 +5,8 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import {
 	adminPermission,
+	client,
+	clientMember,
 	documentShare,
 	user,
 	userInvite,
@@ -26,12 +28,28 @@ export function inviteUrl(token: string) {
 	return `${process.env.NEXT_PUBLIC_APP_URL}/portal/invite/${token}`;
 }
 
-/** Invite someone to create an account, as an admin or a client. */
+/**
+ * Invite someone to create an account, as an admin or a client. Client
+ * invites name the company they'll join, which gives them its shared folder.
+ */
 export async function createUserInvite(
 	actor: Actor,
-	input: { email: string; role: "admin" | "client"; adminRights?: AdminRights },
+	input: {
+		email: string;
+		role: "admin" | "client";
+		adminRights?: AdminRights;
+		clientId?: string;
+	},
 ) {
 	assertCan(actor, input.role === "admin" ? "canManageAdmins" : "canShare");
+
+	const company =
+		input.role === "client" && isUuid(input.clientId)
+			? await db.query.client.findFirst({ where: eq(client.id, input.clientId) })
+			: undefined;
+	if (input.role === "client" && !company) {
+		throw new DmsError("Choose which client this person belongs to.");
+	}
 
 	const email = normalizeEmail(input.email);
 	const existing = await db.query.user.findFirst({
@@ -54,6 +72,7 @@ export async function createUserInvite(
 			email,
 			role: input.role,
 			adminRights: input.role === "admin" ? (input.adminRights ?? NO_RIGHTS) : null,
+			clientId: company?.id ?? null,
 			tokenHash,
 			invitedBy: actor.id,
 			expiresAt: new Date(Date.now() + INVITE_TTL_MS),
@@ -70,7 +89,13 @@ export async function createUserInvite(
 	await logActivity({
 		actorId: actor.id,
 		action: "user.invite",
-		metadata: { email, role: input.role, inviteId: invite.id },
+		clientId: company?.id,
+		metadata: {
+			email,
+			role: input.role,
+			inviteId: invite.id,
+			...(company ? { client: company.name } : {}),
+		},
 	});
 
 	return invite;
@@ -226,6 +251,14 @@ async function markAccepted(invite: ResolvedInvite, userId: string) {
 						target: adminPermission.userId,
 						set: { ...rights, updatedBy: row[0]?.invitedBy },
 					});
+			}
+
+			// Client invites add them to their company's shared folder.
+			if (invite.role === "client" && row[0]?.clientId) {
+				await tx
+					.insert(clientMember)
+					.values({ userId, clientId: row[0].clientId })
+					.onConflictDoNothing();
 			}
 		}
 

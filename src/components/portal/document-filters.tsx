@@ -48,7 +48,7 @@ export function DocumentFilters({
 					fieldClassName="pl-9"
 				/>
 			</form>
-			{clients.length > 0 ? (
+			{clients.length > 1 ? (
 				<SelectField
 					id="client-filter"
 					label="Filter by client"

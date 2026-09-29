@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Download, Globe, Lock } from "lucide-react";
+import { ArrowLeft, Building2, Download, Globe, Lock } from "lucide-react";
 
 import { DocumentActions } from "@/components/portal/document-actions";
 import { SharePanel } from "@/components/portal/share-panel";
@@ -63,6 +63,11 @@ export default async function DocumentPage({
 					</div>
 				</div>
 				<div className="flex shrink-0 items-center gap-2">
+					{doc.uploadedByClient ? (
+						<Badge tone="accent">
+							<Building2 className="size-3" aria-hidden /> Client upload
+						</Badge>
+					) : null}
 					{doc.visibility === "public" ? (
 						<Badge tone="public">
 							<Globe className="size-3" aria-hidden /> Public
@@ -130,9 +135,9 @@ export default async function DocumentPage({
 						id={doc.id}
 						name={doc.name}
 						visibility={doc.visibility}
-						canRename={can(actor, "canUpload")}
+						canRename={doc.canRename}
 						canChangeVisibility={can(actor, "canShare")}
-						canDelete={can(actor, "canDelete")}
+						canDelete={doc.canDelete}
 					/>
 
 					{shares ? <SharePanel documentId={doc.id} shares={shares} /> : null}

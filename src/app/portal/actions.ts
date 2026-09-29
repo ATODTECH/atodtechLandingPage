@@ -125,6 +125,7 @@ export async function inviteUserAction(input: {
 	email: string;
 	role: "admin" | "client";
 	adminRights?: AdminRights;
+	clientId?: string;
 }) {
 	return run(async () => {
 		await invites.createUserInvite(await requireActor(), input);
@@ -149,6 +150,16 @@ export async function setAdminRightsAction(userId: string, rights: AdminRights) 
 export async function removeAdminAction(userId: string) {
 	return run(async () => {
 		await team.removeAdmin(await requireActor(), userId);
+		revalidatePath("/portal/team");
+	});
+}
+
+export async function setClientMembershipsAction(
+	userId: string,
+	clientIds: string[],
+) {
+	return run(async () => {
+		await team.setClientMemberships(await requireActor(), userId, clientIds);
 		revalidatePath("/portal/team");
 	});
 }

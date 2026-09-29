@@ -1,8 +1,10 @@
 import "server-only";
-import { and, asc, desc, eq, gt } from "drizzle-orm";
+import { and, asc, desc, eq, gt, inArray } from "drizzle-orm";
 import { db } from "@/lib/db";
 import {
 	adminPermission,
+	client,
+	clientMember,
 	documentShare,
 	user,
 	userInvite,
@@ -21,7 +23,7 @@ import {
 export async function listTeam(actor: Actor) {
 	assertCan(actor, "canManageAdmins");
 
-	const [users, invites] = await Promise.all([
+	const [users, invites, memberships] = await Promise.all([
 		db
 			.select({
 				id: user.id,
@@ -48,12 +50,31 @@ export async function listTeam(actor: Actor) {
 			),
 			orderBy: desc(userInvite.createdAt),
 			columns: { tokenHash: false },
+			with: { client: { columns: { name: true } } },
 		}),
+		db
+			.select({
+				userId: clientMember.userId,
+				clientId: client.id,
+				clientName: client.name,
+			})
+			.from(clientMember)
+			.innerJoin(client, eq(client.id, clientMember.clientId))
+			.orderBy(asc(client.name)),
 	]);
 
 	return {
-		users: users.map((u) => ({ ...u, rights: u.rights ?? NO_RIGHTS })),
-		invites,
+		users: users.map((u) => ({
+			...u,
+			rights: u.rights ?? NO_RIGHTS,
+			clients: memberships
+				.filter((m) => m.userId === u.id)
+				.map((m) => ({ id: m.clientId, name: m.clientName })),
+		})),
+		invites: invites.map(({ client: company, ...i }) => ({
+			...i,
+			clientName: company?.name ?? null,
+		})),
 	};
 }
 
@@ -167,4 +188,76 @@ export async function removeUser(actor: Actor, userId: string) {
 		// Cascades to sessions (signing them out), accounts and admin rights.
 		await tx.delete(user).where(eq(user.id, userId));
 	});
+}
+
+/**
+ * Sets which client companies a client user belongs to. Membership gives
+ * them that company's shared folder: they can upload there and see what
+ * other people at the company upload.
+ */
+export async function setClientMemberships(
+	actor: Actor,
+	userId: string,
+	clientIds: string[],
+) {
+	assertCan(actor, "canManageAdmins");
+	const target = await db.query.user.findFirst({ where: eq(user.id, userId) });
+	if (!target) throw new DmsError("User not found.");
+	if (target.role !== "client") {
+		throw new DmsError("Only client accounts belong to client companies.");
+	}
+
+	const wanted = [...new Set(clientIds)];
+	const companies = wanted.length
+		? await db.select().from(client).where(inArray(client.id, wanted))
+		: [];
+	if (companies.length !== wanted.length) throw new DmsError("Client not found.");
+
+	const current = await db
+		.select({ clientId: clientMember.clientId, name: client.name })
+		.from(clientMember)
+		.innerJoin(client, eq(client.id, clientMember.clientId))
+		.where(eq(clientMember.userId, userId));
+	const added = companies.filter((c) => !current.some((m) => m.clientId === c.id));
+	const removed = current.filter((m) => !wanted.includes(m.clientId));
+	if (added.length === 0 && removed.length === 0) return;
+
+	await db.transaction(async (tx) => {
+		if (added.length) {
+			await tx
+				.insert(clientMember)
+				.values(added.map((c) => ({ userId, clientId: c.id })))
+				.onConflictDoNothing();
+		}
+		if (removed.length) {
+			await tx.delete(clientMember).where(
+				and(
+					eq(clientMember.userId, userId),
+					inArray(
+						clientMember.clientId,
+						removed.map((m) => m.clientId),
+					),
+				),
+			);
+		}
+	});
+
+	for (const c of added) {
+		await logActivity({
+			actorId: actor.id,
+			action: "client.member_add",
+			clientId: c.id,
+			targetUserId: userId,
+			metadata: { email: target.email, client: c.name },
+		});
+	}
+	for (const m of removed) {
+		await logActivity({
+			actorId: actor.id,
+			action: "client.member_remove",
+			clientId: m.clientId,
+			targetUserId: userId,
+			metadata: { email: target.email, client: m.name },
+		});
+	}
 }
