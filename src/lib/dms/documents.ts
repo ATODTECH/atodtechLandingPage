@@ -1,6 +1,7 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
-import { and, desc, eq, ilike, isNotNull, isNull, or } from "drizzle-orm";
+import { after } from "next/server";
+import { and, desc, eq, ilike, inArray, isNotNull, isNull, or } from "drizzle-orm";
 import { db } from "@/lib/db";
 import {
 	client,
@@ -8,6 +9,7 @@ import {
 	documentShare,
 	user,
 } from "@/lib/db/schema";
+import { sendClientUploadEmail } from "@/lib/email/client-upload-email";
 import { sendInviteEmail } from "@/lib/email/invite-email";
 import {
 	buildStorageKey,
@@ -23,6 +25,9 @@ import { inviteUrl } from "@/lib/dms/invites";
 import {
 	assertCan,
 	canAccessDocument,
+	canDeleteDocument,
+	canRenameDocument,
+	canUploadTo,
 	isStaff,
 	type Actor,
 } from "@/lib/dms/permissions";
@@ -63,12 +68,14 @@ export type DocumentListItem = {
 	clientId: string;
 	clientName: string;
 	uploaderName: string | null;
+	uploadedByClient: boolean;
 	canDownload: boolean;
 };
 
 /**
  * Documents the actor can see. Staff see everything; clients see public
- * documents plus ones shared with them that they've accepted.
+ * documents, ones shared with them that they've accepted, and client uploads
+ * in the companies they belong to.
  */
 export async function listDocuments(
 	actor: Actor,
@@ -87,6 +94,7 @@ export async function listDocuments(
 			clientId: document.clientId,
 			clientName: client.name,
 			uploaderName: user.name,
+			uploadedByClient: document.uploadedByClient,
 			shareAccess: documentShare.access,
 		})
 		.from(document)
@@ -112,7 +120,16 @@ export async function listDocuments(
 					: undefined,
 				staff
 					? undefined
-					: or(eq(document.visibility, "public"), isNotNull(documentShare.id)),
+					: or(
+							eq(document.visibility, "public"),
+							isNotNull(documentShare.id),
+							actor.clientIds.length > 0
+								? and(
+										eq(document.uploadedByClient, true),
+										inArray(document.clientId, actor.clientIds),
+									)
+								: undefined,
+						),
 			),
 		)
 		.orderBy(desc(document.createdAt));
@@ -120,7 +137,10 @@ export async function listDocuments(
 	return rows.map(({ shareAccess, ...row }) => ({
 		...row,
 		canDownload:
-			staff || row.visibility === "public" || shareAccess === "download",
+			staff ||
+			row.visibility === "public" ||
+			shareAccess === "download" ||
+			(row.uploadedByClient && actor.clientIds.includes(row.clientId)),
 	}));
 }
 
@@ -143,6 +163,8 @@ export async function getDocument(actor: Actor, id: string) {
 	return {
 		...doc,
 		canDownload: await canAccessDocument(actor, doc, "download"),
+		canRename: canRenameDocument(actor, doc),
+		canDelete: canDeleteDocument(actor, doc),
 	};
 }
 
@@ -160,8 +182,6 @@ export async function requestUpload(
 		sizeBytes: number;
 	},
 ) {
-	assertCan(actor, "canUpload");
-
 	const mimeType = input.mimeType || "application/octet-stream";
 	if (!ALLOWED_MIME_TYPES.includes(mimeType)) {
 		throw new DmsError(`Files of type "${mimeType}" can't be uploaded.`);
@@ -173,6 +193,8 @@ export async function requestUpload(
 		? await db.query.client.findFirst({ where: eq(client.id, input.clientId) })
 		: undefined;
 	if (!owner) throw new DmsError("Choose a client for this document.");
+	// Clients may only upload into their own companies' folders.
+	if (!canUploadTo(actor, owner.id)) throw new ForbiddenError();
 
 	const id = randomUUID();
 	const name = input.fileName.trim().slice(0, 255) || "Untitled";
@@ -186,6 +208,7 @@ export async function requestUpload(
 		mimeType,
 		sizeBytes: input.sizeBytes,
 		uploadedBy: actor.id,
+		uploadedByClient: actor.role === "client",
 	});
 
 	return { documentId: id, uploadUrl: await getUploadUrl(storageKey, mimeType) };
@@ -193,11 +216,15 @@ export async function requestUpload(
 
 /** Step 2 of an upload: checks the file reached Spaces, then publishes it. */
 export async function confirmUpload(actor: Actor, id: string) {
-	assertCan(actor, "canUpload");
-
+	// Only whoever started the upload can confirm it.
 	const doc = isUuid(id)
 		? await db.query.document.findFirst({
-				where: and(eq(document.id, id), eq(document.status, "pending")),
+				where: and(
+					eq(document.id, id),
+					eq(document.status, "pending"),
+					eq(document.uploadedBy, actor.id),
+				),
+				with: { client: true },
 			})
 		: undefined;
 	if (!doc) throw new DmsError("Upload not found.");
@@ -220,6 +247,43 @@ export async function confirmUpload(actor: Actor, id: string) {
 		clientId: doc.clientId,
 		metadata: { name: doc.name, sizeBytes: doc.sizeBytes },
 	});
+
+	if (doc.uploadedByClient) {
+		// Sent after the response, so the uploader isn't kept waiting.
+		after(() =>
+			notifyOwnersOfClientUpload(actor, {
+				id,
+				name: doc.name,
+				clientName: doc.client.name,
+			}),
+		);
+	}
+}
+
+/** Emails every owner. A failed email never fails the upload itself. */
+async function notifyOwnersOfClientUpload(
+	actor: Actor,
+	doc: { id: string; name: string; clientName: string },
+) {
+	const owners = await db
+		.select({ email: user.email })
+		.from(user)
+		.where(eq(user.role, "owner"));
+
+	await Promise.all(
+		owners.map((owner) =>
+			sendClientUploadEmail({
+				to: owner.email,
+				uploaderName: actor.name,
+				uploaderEmail: actor.email,
+				clientName: doc.clientName,
+				documentName: doc.name,
+				url: `${process.env.NEXT_PUBLIC_APP_URL}/portal/documents/${doc.id}`,
+			}).catch((error) =>
+				console.error("Client upload notification failed:", error),
+			),
+		),
+	);
 }
 
 /** A short-lived link to preview (inline) or download (attachment) a file. */
@@ -248,8 +312,8 @@ export async function getFileUrl(
 }
 
 export async function renameDocument(actor: Actor, id: string, name: string) {
-	assertCan(actor, "canUpload");
 	const doc = await findDocument(id);
+	if (!canRenameDocument(actor, doc)) throw new ForbiddenError();
 	const newName = name.trim().slice(0, 255);
 	if (!newName) throw new DmsError("Name can't be empty.");
 
@@ -287,8 +351,8 @@ export async function setVisibility(
  * (marked deleted) so the activity log still has something to point at.
  */
 export async function deleteDocument(actor: Actor, id: string) {
-	assertCan(actor, "canDelete");
 	const doc = await findDocument(id);
+	if (!canDeleteDocument(actor, doc)) throw new ForbiddenError();
 
 	await deleteObject(doc.storageKey);
 	await db

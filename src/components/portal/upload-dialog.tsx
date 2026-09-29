@@ -74,13 +74,19 @@ type FileState = {
 export function UploadDialog({
 	clients,
 	defaultClientId,
+	asClient = false,
 }: {
 	clients: { id: string; name: string }[];
 	defaultClientId?: string;
+	/** Client users upload into their company's shared folder. */
+	asClient?: boolean;
 }) {
 	const router = useRouter();
 	const [open, setOpen] = useState(false);
-	const [clientId, setClientId] = useState(defaultClientId ?? "");
+	// With only one client to choose from, there's nothing to pick.
+	const [clientId, setClientId] = useState(
+		defaultClientId ?? (clients.length === 1 ? clients[0].id : ""),
+	);
 	const [files, setFiles] = useState<FileState[]>([]);
 	const [uploading, setUploading] = useState(false);
 
@@ -156,8 +162,9 @@ export function UploadDialog({
 				<DialogHeader>
 					<DialogTitle>Upload documents</DialogTitle>
 					<DialogDescription>
-						New documents are private until you share them or make them public.
-						Max 100 MB each.
+						{asClient
+							? "Files you upload are visible to the Atod Tech team and everyone at your company. Max 100 MB each."
+							: "New documents are private until you share them or make them public. Max 100 MB each."}
 					</DialogDescription>
 				</DialogHeader>
 
@@ -170,15 +177,22 @@ export function UploadDialog({
 					</p>
 				) : (
 					<div className="flex flex-col gap-4">
-						<SelectField
-							id="upload-client"
-							label="Client"
-							placeholder="Choose a client…"
-							options={clients.map((c) => ({ value: c.id, label: c.name }))}
-							value={clientId}
-							onValueChange={setClientId}
-							disabled={uploading}
-						/>
+						{clients.length === 1 ? (
+							<p className="text-sm text-white/70">
+								Uploading to{" "}
+								<strong className="text-white">{clients[0].name}</strong>
+							</p>
+						) : (
+							<SelectField
+								id="upload-client"
+								label="Client"
+								placeholder="Choose a client…"
+								options={clients.map((c) => ({ value: c.id, label: c.name }))}
+								value={clientId}
+								onValueChange={setClientId}
+								disabled={uploading}
+							/>
+						)}
 
 						<div className="flex flex-col gap-2">
 							<Label htmlFor="upload-files" className="text-sm text-[#EAEAEA]">

@@ -1,7 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { MailPlus, ShieldCheck, ShieldOff, Trash2, X } from "lucide-react";
+import Link from "next/link";
+import {
+	Building2,
+	MailPlus,
+	ShieldCheck,
+	ShieldOff,
+	Trash2,
+	X,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -10,6 +18,7 @@ import {
 	removeUserAction,
 	revokeInviteAction,
 	setAdminRightsAction,
+	setClientMembershipsAction,
 } from "@/app/portal/actions";
 import { FormField } from "@/components/form/form-field";
 import { LoadingButton } from "@/components/form/loading-button";
@@ -30,7 +39,7 @@ import { formatDate, RIGHT_LABELS } from "@/lib/dms/format";
 type Right = keyof AdminRights;
 const RIGHTS = Object.keys(RIGHT_LABELS) as Right[];
 const ROLE_OPTIONS = [
-	{ value: "client", label: "Client (view & download only)" },
+	{ value: "client", label: "Client (view, download & upload)" },
 	{ value: "admin", label: "Admin" },
 ];
 const NONE = Object.fromEntries(RIGHTS.map((r) => [r, false])) as AdminRights;
@@ -42,12 +51,14 @@ type TeamUser = {
 	role: string;
 	createdAt: Date;
 	rights: AdminRights;
+	clients: { id: string; name: string }[];
 };
 type TeamInvite = {
 	id: string;
 	email: string;
 	role: "admin" | "client";
 	expiresAt: Date;
+	clientName: string | null;
 };
 
 /** Checkboxes for admin rights. Rights the current user lacks can't be granted. */
@@ -106,9 +117,12 @@ export function TeamManager({
 	currentUserId,
 	grantable,
 	canRemoveUsers,
+	clients,
 }: {
 	users: TeamUser[];
 	invites: TeamInvite[];
+	/** Every client company, for invites and memberships. */
+	clients: { id: string; name: string }[];
 	currentUserId: string;
 	grantable: AdminRights;
 	/** Only the owner can delete people. */
@@ -122,6 +136,11 @@ export function TeamManager({
 	const [busy, setBusy] = useState<string | null>(null);
 	const [removing, setRemoving] = useState<TeamUser | null>(null);
 	const [removePending, setRemovePending] = useState(false);
+	const [inviteClientId, setInviteClientId] = useState("");
+	const [companiesFor, setCompaniesFor] = useState<TeamUser | null>(null);
+	const [companySelection, setCompanySelection] = useState<string[]>([]);
+	const [savingCompanies, setSavingCompanies] = useState(false);
+	const clientOptions = clients.map((c) => ({ value: c.id, label: c.name }));
 
 	async function invite(event: React.FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -131,12 +150,32 @@ export function TeamManager({
 			email: String(new FormData(form).get("email")),
 			role: inviteRole,
 			adminRights: inviteRole === "admin" ? inviteRights : undefined,
+			clientId: inviteRole === "client" ? inviteClientId : undefined,
 		});
 		setInviting(false);
 		if (!result.ok) return toast.error(result.error);
 		form.reset();
 		setInviteRights(NONE);
+		setInviteClientId("");
 		toast.success("Invite sent.");
+	}
+
+	function openCompanies(user: TeamUser) {
+		setCompaniesFor(user);
+		setCompanySelection(user.clients.map((c) => c.id));
+	}
+
+	async function saveCompanies() {
+		if (!companiesFor) return;
+		setSavingCompanies(true);
+		const result = await setClientMembershipsAction(
+			companiesFor.id,
+			companySelection,
+		);
+		setSavingCompanies(false);
+		if (!result.ok) return toast.error(result.error);
+		toast.success(`Updated ${companiesFor.name}'s clients.`);
+		setCompaniesFor(null);
 	}
 
 	function openEditor(user: TeamUser) {
@@ -225,6 +264,22 @@ export function TeamManager({
 										{u.email} · Joined{" "}
 										{formatDate(u.createdAt)}
 									</p>
+									{u.role === "client" ? (
+										<p className="mt-1.5 flex flex-wrap items-center gap-1.5 text-xs">
+											{u.clients.length > 0 ? (
+												u.clients.map((c) => (
+													<Badge key={c.id}>
+														<Building2 className="size-3" aria-hidden />
+														{c.name}
+													</Badge>
+												))
+											) : (
+												<span className="text-amber-300/80">
+													Not in a client yet: can&rsquo;t upload
+												</span>
+											)}
+										</p>
+									) : null}
 									{u.role === "admin" ? (
 										<p className="mt-1 text-xs text-white/60">
 											{granted.length === RIGHTS.length
@@ -243,7 +298,17 @@ export function TeamManager({
 									) : null}
 								</div>
 								{editable ? (
-									<div className="flex shrink-0 gap-1">
+									<div className="flex shrink-0 flex-wrap gap-1">
+										{u.role === "client" ? (
+											<Button
+												variant="ghost"
+												size="sm"
+												className="cursor-pointer"
+												onClick={() => openCompanies(u)}
+											>
+												<Building2 aria-hidden /> Clients
+											</Button>
+										) : null}
 										<Button
 											variant="ghost"
 											size="sm"
@@ -299,7 +364,7 @@ export function TeamManager({
 										<p className="text-xs text-white/50">
 											{i.role === "admin"
 												? "Admin"
-												: "Client"}{" "}
+												: `Client${i.clientName ? ` at ${i.clientName}` : ""}`}{" "}
 											· Expires {formatDate(i.expiresAt)}
 										</p>
 									</div>
@@ -347,10 +412,28 @@ export function TeamManager({
 							onChange={setInviteRights}
 							grantable={grantable}
 						/>
-					) : null}
+					) : clients.length > 0 ? (
+						<SelectField
+							id="invite-client"
+							label="Client"
+							placeholder="Which client do they work for?"
+							options={clientOptions}
+							value={inviteClientId}
+							onValueChange={setInviteClientId}
+							required
+						/>
+					) : (
+						<p className="text-sm text-white/60">
+							Add a client first so the person can be added to it.{" "}
+							<Link href="/portal/clients" className="text-brand-accent hover:underline">
+								Go to clients
+							</Link>
+						</p>
+					)}
 					<LoadingButton
 						type="submit"
 						loading={inviting}
+						disabled={inviteRole === "client" && !inviteClientId}
 						className="h-11 rounded-lg bg-brand-accent text-white hover:bg-brand-accent/90"
 					>
 						Send invite
@@ -358,6 +441,56 @@ export function TeamManager({
 				</form>
 			</section>
 
+			<Dialog
+				open={companiesFor !== null}
+				onOpenChange={(open) => !open && !savingCompanies && setCompaniesFor(null)}
+			>
+				<DialogContent className={dialogClassName}>
+					<DialogHeader>
+						<DialogTitle>Clients for {companiesFor?.name}</DialogTitle>
+						<DialogDescription>
+							They can upload to these clients&rsquo; folders and see what
+							others at the same client upload.
+						</DialogDescription>
+					</DialogHeader>
+					{clients.length === 0 ? (
+						<p className="text-sm text-white/60">No clients yet.</p>
+					) : (
+						<fieldset className="flex max-h-64 flex-col gap-2 overflow-y-auto">
+							<legend className="sr-only">Clients</legend>
+							{clients.map((c) => (
+								<label
+									key={c.id}
+									className="flex cursor-pointer items-center gap-2 text-sm"
+								>
+									<input
+										type="checkbox"
+										checked={companySelection.includes(c.id)}
+										onChange={(e) =>
+											setCompanySelection((prev) =>
+												e.target.checked
+													? [...prev, c.id]
+													: prev.filter((id) => id !== c.id),
+											)
+										}
+										className="size-4 accent-[#f56f46]"
+									/>
+									{c.name}
+								</label>
+							))}
+						</fieldset>
+					)}
+					<DialogFooter className="rounded-b-lg border-white/10 bg-white/5">
+						<LoadingButton
+							loading={savingCompanies}
+							onClick={saveCompanies}
+							className="rounded-lg bg-brand-accent text-white hover:bg-brand-accent/90"
+						>
+							Save
+						</LoadingButton>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
 			<Dialog
 				open={editing !== null}
 				onOpenChange={(open) => !open && setEditing(null)}

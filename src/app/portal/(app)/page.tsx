@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Download, Globe, Lock } from "lucide-react";
+import { Building2, Download, Globe, Lock } from "lucide-react";
 
 import { DocumentFilters } from "@/components/portal/document-filters";
 import {
@@ -37,13 +37,29 @@ export default async function DocumentsPage({
 				description={
 					staff
 						? "Every document across all clients."
-						: "Documents shared with you and public documents."
+						: actor.clientIds.length > 0
+							? "Your company's shared folder, plus documents shared with you."
+							: "Documents shared with you and public documents."
 				}
 			>
-				{can(actor, "canUpload") ? (
-					<UploadDialog clients={clients} defaultClientId={clientId} />
+				{can(actor, "canUpload") || actor.clientIds.length > 0 ? (
+					<UploadDialog
+						clients={clients}
+						defaultClientId={clientId}
+						asClient={!staff}
+					/>
 				) : null}
 			</PageHeader>
+
+			{actor.role === "client" && actor.clientIds.length === 0 ? (
+				<p
+					role="status"
+					className="mb-4 rounded-lg border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-sm text-amber-200"
+				>
+					Uploading isn&rsquo;t set up for your account yet. Ask the Atod Tech
+					team to add you to your company&rsquo;s folder.
+				</p>
+			) : null}
 
 			<DocumentFilters clients={clients} />
 
@@ -51,7 +67,7 @@ export default async function DocumentsPage({
 				<EmptyState title={filtered ? "No matching documents" : "No documents yet"}>
 					{filtered
 						? "Try a different search or client."
-						: staff
+						: staff || actor.clientIds.length > 0
 							? "Upload a document to get started."
 							: "Documents shared with you will appear here."}
 				</EmptyState>
@@ -81,6 +97,12 @@ export default async function DocumentsPage({
 											<span className="truncate font-medium hover:underline">
 												{doc.name}
 											</span>
+											{doc.uploadedByClient ? (
+												<Badge tone="accent" className="shrink-0">
+													<Building2 className="size-3" aria-hidden />
+													{staff ? "Client upload" : doc.uploaderName ?? "Client"}
+												</Badge>
+											) : null}
 											{doc.visibility === "public" ? (
 												<Badge tone="public" className="shrink-0">
 													<Globe className="size-3" aria-hidden />

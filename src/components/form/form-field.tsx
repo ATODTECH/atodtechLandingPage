@@ -1,4 +1,7 @@
+"use client";
+
 import * as React from "react";
+import { Eye, EyeOff } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -58,6 +61,8 @@ export function FormField({
 	labelClassName,
 	fieldClassName,
 }: FormFieldProps) {
+	const [showPassword, setShowPassword] = React.useState(false);
+	const isPassword = type === "password";
 	const errorId = error ? `${id}-error` : undefined;
 	const hintId = hint ? `${id}-hint` : undefined;
 	const describedBy = [errorId, hintId].filter(Boolean).join(" ") || undefined;
@@ -93,6 +98,30 @@ export function FormField({
 					rows={rows}
 					className={cn("min-h-23 resize-none", fieldBase, fieldClassName)}
 				/>
+			) : isPassword ? (
+				<div className="relative">
+					<Input
+						{...shared}
+						type={showPassword ? "text" : "password"}
+						autoComplete={autoComplete}
+						className={cn("h-11.5 pr-11", fieldBase, fieldClassName)}
+					/>
+					<button
+						type="button"
+						onClick={() => setShowPassword((shown) => !shown)}
+						disabled={disabled}
+						aria-label={showPassword ? "Hide password" : "Show password"}
+						aria-pressed={showPassword}
+						aria-controls={id}
+						className="absolute inset-y-0 right-0 flex w-11 cursor-pointer items-center justify-center rounded-r-lg text-[#6D758F] transition-colors hover:text-[#0c111d] focus-visible:outline-2 focus-visible:outline-brand-accent disabled:cursor-not-allowed disabled:opacity-50"
+					>
+						{showPassword ? (
+							<EyeOff className="size-4" aria-hidden />
+						) : (
+							<Eye className="size-4" aria-hidden />
+						)}
+					</button>
+				</div>
 			) : (
 				<Input
 					{...shared}
