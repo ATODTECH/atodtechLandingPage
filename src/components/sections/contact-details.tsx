@@ -145,8 +145,8 @@ export function ContactDetails() {
 					<ContactMethod
 						icon={Mail}
 						label="Email:"
-						value="atodtech200@gmail.com"
-						href="mailto:atodtech200@gmail.com"
+						value="info@atodtech.com"
+						href="mailto:info@atodtech.com"
 					/>
 					<hr className="border-white" />
 					<ContactMethod

@@ -5,11 +5,7 @@ import * as yup from "yup";
 import { renderContactEmail } from "@/lib/email/contact-email";
 import { ContactUsSchema } from "@/lib/validation-schemas";
 
-const CONTACT_RECIPIENTS = [
-	// "info@atodtech.com",
-	"tolajinadu1123@gmail.com",
-	"atodtech200@gmail.com",
-];
+const CONTACT_RECIPIENTS = ["info@atodtech.com"];
 const FROM_ADDRESS = "Atod Contact Form <noreply@atodtech.com>";
 
 export async function POST(request: Request) {
