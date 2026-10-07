@@ -35,7 +35,6 @@ const footerColumns = [
 		heading: "Contact Us",
 		links: [
 			{ label: "info@atodtech.com", href: "mailto:info@atodtech.com" },
-			{ label: "admin@atodtech.com", href: "mailto:admin@atodtech.com" },
 			{ label: "+234 906 052 6791", href: "tel:+2349060526791" },
 			{ label: "Request a Consultation", href: "/contact" },
 			{ label: "Contact Us", href: "/contact" },
@@ -62,12 +61,16 @@ export function Footer() {
 							aria-label="ATOD Tech Agency - Home"
 							className="block cursor-pointer"
 						>
-							<AtodBrandLogo aria-hidden className="h-20 w-auto" />
+							<AtodBrandLogo
+								aria-hidden
+								className="h-20 w-auto"
+							/>
 						</Link>
 						<p className="mt-6 max-w-92.75 text-base leading-6 text-white">
-							ATOD builds custom software, mobile applications, web platforms
-							and AI automation solutions for organisations in the United
-							States, Nigeria and beyond.
+							ATOD builds custom software, mobile applications,
+							web platforms and AI automation solutions for
+							organisations in the United States, Nigeria and
+							beyond.
 						</p>
 						<div className="mt-8 flex items-start gap-4">
 							{socialIcons.map((icon) => (
@@ -77,14 +80,21 @@ export function Footer() {
 									aria-label={icon.label}
 									className="cursor-pointer transition-opacity hover:opacity-70"
 								>
-									<Image src={icon.src} alt="" className="size-6" />
+									<Image
+										src={icon.src}
+										alt=""
+										className="size-6"
+									/>
 								</a>
 							))}
 						</div>
 					</div>
 
 					{footerColumns.map((column) => (
-						<div key={column.heading} className="flex flex-col gap-8">
+						<div
+							key={column.heading}
+							className="flex flex-col gap-8"
+						>
 							<h3 className="text-base font-semibold leading-5.5 text-brand">
 								{column.heading}
 							</h3>
@@ -92,16 +102,24 @@ export function Footer() {
 								{column.links.map((link) => {
 									const className =
 										"cursor-pointer break-all text-base leading-5.5 text-white transition-colors hover:text-brand-accent";
-									const isDirect = /^(mailto|tel):/.test(link.href);
+									const isDirect = /^(mailto|tel):/.test(
+										link.href,
+									);
 
 									return (
 										<li key={link.label}>
 											{isDirect ? (
-												<a href={link.href} className={className}>
+												<a
+													href={link.href}
+													className={className}
+												>
 													{link.label}
 												</a>
 											) : (
-												<Link href={link.href} className={className}>
+												<Link
+													href={link.href}
+													className={className}
+												>
 													{link.label}
 												</Link>
 											)}
@@ -116,13 +134,19 @@ export function Footer() {
 				<div className="mt-12 flex h-15 items-center justify-center border-t border-[#e1e4ed]/40 py-12 md:py-6">
 					<p className="text-center text-sm leading-5.5 text-white/90 lg:text-base">
 						Copyright &copy; 2026 ATOD Tech Agency{" "}
-						<span className="text-[#d3d7e5]">|</span> All Rights Reserved{" "}
-						<span className="text-[#d3d7e5]">|</span>{" "}
-						<a href="#" className="cursor-pointer underline hover:text-white">
+						<span className="text-[#d3d7e5]">|</span> All Rights
+						Reserved <span className="text-[#d3d7e5]">|</span>{" "}
+						<a
+							href="#"
+							className="cursor-pointer underline hover:text-white"
+						>
 							Terms and Conditions
 						</a>{" "}
 						<span className="text-[#d3d7e5]">|</span>{" "}
-						<a href="#" className="cursor-pointer underline hover:text-white">
+						<a
+							href="#"
+							className="cursor-pointer underline hover:text-white"
+						>
 							Privacy Policy
 						</a>
 					</p>
