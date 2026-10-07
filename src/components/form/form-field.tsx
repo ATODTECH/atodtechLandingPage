@@ -1,4 +1,7 @@
+"use client";
+
 import * as React from "react";
+import { Eye, EyeOff } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,6 +18,13 @@ type FormFieldProps = {
 	value?: string;
 	defaultValue?: string;
 	disabled?: boolean;
+	readOnly?: boolean;
+	required?: boolean;
+	autoComplete?: string;
+	autoFocus?: boolean;
+	minLength?: number;
+	maxLength?: number;
+	hint?: string;
 	error?: string;
 	onChange?: React.ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement>;
 	onBlur?: React.FocusEventHandler<HTMLInputElement | HTMLTextAreaElement>;
@@ -22,6 +32,10 @@ type FormFieldProps = {
 	labelClassName?: string;
 	fieldClassName?: string;
 };
+
+// dark:bg-white keeps fields white inside `.dark` containers (e.g. the portal).
+const fieldBase =
+	"rounded-lg bg-white text-[#6D758F] dark:bg-white dark:disabled:bg-white/80";
 
 export function FormField({
 	id,
@@ -33,6 +47,13 @@ export function FormField({
 	value,
 	defaultValue,
 	disabled,
+	readOnly,
+	required,
+	autoComplete,
+	autoFocus,
+	minLength,
+	maxLength,
+	hint,
 	error,
 	onChange,
 	onBlur,
@@ -40,7 +61,28 @@ export function FormField({
 	labelClassName,
 	fieldClassName,
 }: FormFieldProps) {
+	const [showPassword, setShowPassword] = React.useState(false);
+	const isPassword = type === "password";
 	const errorId = error ? `${id}-error` : undefined;
+	const hintId = hint ? `${id}-hint` : undefined;
+	const describedBy = [errorId, hintId].filter(Boolean).join(" ") || undefined;
+	const shared = {
+		id,
+		name: name ?? id,
+		placeholder,
+		value,
+		defaultValue,
+		disabled,
+		readOnly,
+		required,
+		autoFocus,
+		minLength,
+		maxLength,
+		onChange,
+		onBlur,
+		"aria-invalid": !!error,
+		"aria-describedby": describedBy,
+	};
 
 	return (
 		<div className={cn("flex flex-col gap-2", className)}>
@@ -52,38 +94,47 @@ export function FormField({
 			</Label>
 			{type === "textarea" ? (
 				<Textarea
-					id={id}
-					name={name ?? id}
+					{...shared}
 					rows={rows}
-					placeholder={placeholder}
-					value={value}
-					defaultValue={defaultValue}
-					disabled={disabled}
-					onChange={onChange}
-					onBlur={onBlur}
-					aria-invalid={!!error}
-					aria-describedby={errorId}
-					className={cn(
-						"min-h-23 resize-none rounded-lg bg-white text-[#6D758F]",
-						fieldClassName,
-					)}
+					className={cn("min-h-23 resize-none", fieldBase, fieldClassName)}
 				/>
+			) : isPassword ? (
+				<div className="relative">
+					<Input
+						{...shared}
+						type={showPassword ? "text" : "password"}
+						autoComplete={autoComplete}
+						className={cn("h-11.5 pr-11", fieldBase, fieldClassName)}
+					/>
+					<button
+						type="button"
+						onClick={() => setShowPassword((shown) => !shown)}
+						disabled={disabled}
+						aria-label={showPassword ? "Hide password" : "Show password"}
+						aria-pressed={showPassword}
+						aria-controls={id}
+						className="absolute inset-y-0 right-0 flex w-11 cursor-pointer items-center justify-center rounded-r-lg text-[#6D758F] transition-colors hover:text-[#0c111d] focus-visible:outline-2 focus-visible:outline-brand-accent disabled:cursor-not-allowed disabled:opacity-50"
+					>
+						{showPassword ? (
+							<EyeOff className="size-4" aria-hidden />
+						) : (
+							<Eye className="size-4" aria-hidden />
+						)}
+					</button>
+				</div>
 			) : (
 				<Input
-					id={id}
-					name={name ?? id}
+					{...shared}
 					type={type}
-					placeholder={placeholder}
-					value={value}
-					defaultValue={defaultValue}
-					disabled={disabled}
-					onChange={onChange}
-					onBlur={onBlur}
-					aria-invalid={!!error}
-					aria-describedby={errorId}
-					className={cn("h-11.5 rounded-lg bg-white text-[#6D758F]", fieldClassName)}
+					autoComplete={autoComplete}
+					className={cn("h-11.5", fieldBase, fieldClassName)}
 				/>
 			)}
+			{hint && !error ? (
+				<p id={hintId} className="text-xs text-white/50">
+					{hint}
+				</p>
+			) : null}
 			{error ? (
 				<p id={errorId} className="text-xs text-destructive">
 					{error}
