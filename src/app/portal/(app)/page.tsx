@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Building2, Download, Globe, Lock } from "lucide-react";
+import { redirect } from "next/navigation";
+import { Building2, ChevronRight, Download, Folder, Globe, Lock } from "lucide-react";
 
 import { DocumentFilters } from "@/components/portal/document-filters";
 import {
@@ -11,24 +12,48 @@ import {
 import { UploadDialog } from "@/components/portal/upload-dialog";
 import { listClients } from "@/lib/dms/clients";
 import { listDocuments } from "@/lib/dms/documents";
+import { folderPath, listFolders } from "@/lib/dms/folders";
 import { formatBytes, formatDate } from "@/lib/dms/format";
-import { can, isStaff } from "@/lib/dms/permissions";
+import { can, canUploadTo, isStaff } from "@/lib/dms/permissions";
 import { requireActor } from "@/lib/dms/session";
 
 export default async function DocumentsPage({
 	searchParams,
 }: {
-	searchParams: Promise<{ client?: string; q?: string }>;
+	searchParams: Promise<{ client?: string; q?: string; folder?: string }>;
 }) {
 	const actor = await requireActor();
-	const { client: clientId, q } = await searchParams;
+	const { client: clientParam, q, folder: folderId } = await searchParams;
+	const query = q?.trim() || undefined;
 	const staff = isStaff(actor);
 
-	const [documents, clients] = await Promise.all([
-		listDocuments(actor, { clientId, query: q?.trim() || undefined }),
+	const [allFolders, clients] = await Promise.all([
+		listFolders(actor),
 		listClients(actor),
 	]);
-	const filtered = Boolean(clientId || q);
+	const path = folderPath(allFolders, folderId ?? null);
+	const openFolder = path.at(-1);
+	// Gone, emptied, or never visible to this person.
+	if (folderId && !openFolder) redirect("/portal");
+
+	const clientId = openFolder?.clientId ?? clientParam;
+	// A search covers every folder; otherwise show one level at a time.
+	const documents = await listDocuments(actor, {
+		clientId,
+		query,
+		folderId: query ? undefined : openFolder?.id ?? null,
+	});
+	const folders = query
+		? []
+		: [...allFolders.values()].filter(
+				(f) =>
+					f.parentId === (openFolder?.id ?? null) &&
+					(!clientId || f.clientId === clientId),
+			);
+	const filtered = Boolean(clientId || query);
+	const canUpload = openFolder
+		? canUploadTo(actor, openFolder.clientId)
+		: can(actor, "canUpload") || actor.clientIds.length > 0;
 
 	return (
 		<>
@@ -42,10 +67,24 @@ export default async function DocumentsPage({
 							: "Documents shared with you and public documents."
 				}
 			>
-				{can(actor, "canUpload") || actor.clientIds.length > 0 ? (
+				{canUpload ? (
 					<UploadDialog
-						clients={clients}
+						// Start fresh when moving to another folder or client.
+						key={openFolder?.id ?? clientId}
+						clients={
+							openFolder
+								? clients.filter((c) => c.id === openFolder.clientId)
+								: clients
+						}
 						defaultClientId={clientId}
+						folder={
+							openFolder
+								? {
+										id: openFolder.id,
+										path: path.map((f) => f.name).join(" / "),
+									}
+								: undefined
+						}
 						asClient={!staff}
 					/>
 				) : null}
@@ -63,7 +102,33 @@ export default async function DocumentsPage({
 
 			<DocumentFilters clients={clients} />
 
-			{documents.length === 0 ? (
+			{openFolder ? (
+				<nav aria-label="Folders" className="mb-4">
+					<ol className="flex flex-wrap items-center gap-1.5 text-sm text-white/60">
+						<li>
+							<Link href="/portal" className="hover:text-white">
+								All documents
+							</Link>
+						</li>
+						{clients.length > 1 ? (
+							<Crumb href={`/portal?client=${openFolder.clientId}`}>
+								{openFolder.clientName}
+							</Crumb>
+						) : null}
+						{path.map((f) => (
+							<Crumb
+								key={f.id}
+								href={`/portal?folder=${f.id}`}
+								current={f.id === openFolder.id}
+							>
+								{f.name}
+							</Crumb>
+						))}
+					</ol>
+				</nav>
+			) : null}
+
+			{documents.length === 0 && folders.length === 0 ? (
 				<EmptyState title={filtered ? "No matching documents" : "No documents yet"}>
 					{filtered
 						? "Try a different search or client."
@@ -86,6 +151,32 @@ export default async function DocumentsPage({
 							</tr>
 						</thead>
 						<tbody className="divide-y divide-white/5">
+							{folders.map((f) => (
+								<tr key={f.id} className="transition-colors hover:bg-white/[0.03]">
+									<td className="max-w-0 px-4 py-3">
+										<Link
+											href={`/portal?folder=${f.id}`}
+											className="flex items-center gap-3"
+										>
+											<Folder
+												className="size-5 shrink-0 fill-brand-accent/20 text-brand-accent"
+												aria-label="Folder"
+											/>
+											<span className="truncate font-medium hover:underline">
+												{f.name}
+											</span>
+										</Link>
+									</td>
+									<td className="hidden px-4 py-3 whitespace-nowrap text-white/70 md:table-cell">
+										{f.clientName}
+									</td>
+									<td className="hidden px-4 py-3 whitespace-nowrap text-white/70 sm:table-cell">
+										{f.documentCount === 1 ? "1 file" : `${f.documentCount} files`}
+									</td>
+									<td className="hidden lg:table-cell" />
+									<td />
+								</tr>
+							))}
 							{documents.map((doc) => (
 								<tr key={doc.id} className="transition-colors hover:bg-white/[0.03]">
 									<td className="max-w-0 px-4 py-3">
@@ -94,8 +185,17 @@ export default async function DocumentsPage({
 											className="flex items-center gap-3"
 										>
 											<FileIcon mimeType={doc.mimeType} className="shrink-0" />
-											<span className="truncate font-medium hover:underline">
-												{doc.name}
+											<span className="min-w-0">
+												<span className="block truncate font-medium hover:underline">
+													{doc.name}
+												</span>
+												{query && doc.folderId ? (
+													<span className="block truncate text-xs text-white/50">
+														{folderPath(allFolders, doc.folderId)
+															.map((f) => f.name)
+															.join(" / ")}
+													</span>
+												) : null}
 											</span>
 											{doc.uploadedByClient ? (
 												<Badge tone="accent" className="shrink-0">
@@ -143,5 +243,30 @@ export default async function DocumentsPage({
 				</div>
 			)}
 		</>
+	);
+}
+
+function Crumb({
+	href,
+	current = false,
+	children,
+}: {
+	href: string;
+	current?: boolean;
+	children: React.ReactNode;
+}) {
+	return (
+		<li className="flex min-w-0 items-center gap-1.5">
+			<ChevronRight className="size-3.5 shrink-0 text-white/30" aria-hidden />
+			{current ? (
+				<span aria-current="page" className="truncate text-white">
+					{children}
+				</span>
+			) : (
+				<Link href={href} className="truncate hover:text-white">
+					{children}
+				</Link>
+			)}
+		</li>
 	);
 }

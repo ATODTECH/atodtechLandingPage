@@ -1,11 +1,11 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray, isNotNull, isNull, or } from "drizzle-orm";
 import { db } from "@/lib/db";
 import {
 	adminPermission,
 	clientMember,
+	document,
 	documentShare,
 	type AdminRights,
-	type document,
 } from "@/lib/db/schema";
 import type { UserRole } from "@/lib/auth";
 import { ForbiddenError } from "@/lib/dms/errors";
@@ -138,6 +138,29 @@ export async function canAccessDocument(
 	});
 	if (!share) return false;
 	return action === "view" || share.access === "download";
+}
+
+/**
+ * The same rules as `canAccessDocument(…, "view")`, as a query condition for
+ * listing. The query must left join documentShare on the actor's accepted share.
+ */
+export function visibleDocuments(actor: Actor) {
+	return and(
+		eq(document.status, "ready"),
+		isNull(document.deletedAt),
+		isStaff(actor)
+			? undefined
+			: or(
+					eq(document.visibility, "public"),
+					isNotNull(documentShare.id),
+					actor.clientIds.length > 0
+						? and(
+								eq(document.uploadedByClient, true),
+								inArray(document.clientId, actor.clientIds),
+							)
+						: undefined,
+				),
+	);
 }
 
 /** Staff with the upload right can upload anywhere; clients only to their companies. */

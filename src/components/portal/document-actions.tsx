@@ -34,6 +34,7 @@ export function DocumentActions({
 	canRename,
 	canChangeVisibility,
 	canDelete,
+	folderId,
 }: {
 	id: string;
 	name: string;
@@ -41,6 +42,8 @@ export function DocumentActions({
 	canRename: boolean;
 	canChangeVisibility: boolean;
 	canDelete: boolean;
+	/** Where to go back to after deleting. */
+	folderId: string | null;
 }) {
 	const router = useRouter();
 	const [renameOpen, setRenameOpen] = useState(false);
@@ -83,7 +86,7 @@ export function DocumentActions({
 			return toast.error(result.error);
 		}
 		toast.success("Document deleted.");
-		router.replace("/portal");
+		router.replace(folderId ? `/portal?folder=${folderId}` : "/portal");
 	}
 
 	if (!canRename && !canChangeVisibility && !canDelete) return null;

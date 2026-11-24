@@ -22,6 +22,8 @@ export function DocumentFilters({
 		const next = new URLSearchParams(params);
 		if (value) next.set(key, value);
 		else next.delete(key);
+		// Both filters cover every folder, so they leave the open one.
+		next.delete("folder");
 		router.replace(`${pathname}?${next}`);
 	}
 

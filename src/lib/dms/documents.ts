@@ -1,12 +1,13 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
 import { after } from "next/server";
-import { and, desc, eq, ilike, inArray, isNotNull, isNull, or } from "drizzle-orm";
+import { and, asc, desc, eq, ilike, inArray, isNull } from "drizzle-orm";
 import { db } from "@/lib/db";
 import {
 	client,
 	document,
 	documentShare,
+	folder,
 	user,
 } from "@/lib/db/schema";
 import { sendClientUploadEmail } from "@/lib/email/client-upload-email";
@@ -20,6 +21,7 @@ import {
 } from "@/lib/storage";
 import { logActivity } from "@/lib/dms/activity";
 import { DmsError, ForbiddenError } from "@/lib/dms/errors";
+import { ensureFolders, folderPathNames } from "@/lib/dms/folders";
 import { isUuid } from "@/lib/dms/format";
 import { inviteUrl } from "@/lib/dms/invites";
 import {
@@ -30,33 +32,10 @@ import {
 	canUploadTo,
 	isStaff,
 	type Actor,
+	visibleDocuments,
 } from "@/lib/dms/permissions";
 import { generateToken, INVITE_TTL_MS, normalizeEmail } from "@/lib/dms/tokens";
-
-export const MAX_UPLOAD_BYTES = 100 * 1024 * 1024;
-
-export const ALLOWED_MIME_TYPES = [
-	"application/pdf",
-	"image/png",
-	"image/jpeg",
-	"image/gif",
-	"image/webp",
-	"image/svg+xml",
-	"text/plain",
-	"text/csv",
-	"text/markdown",
-	"application/json",
-	"application/zip",
-	"application/msword",
-	"application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-	"application/vnd.ms-excel",
-	"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-	"application/vnd.ms-powerpoint",
-	"application/vnd.openxmlformats-officedocument.presentationml.presentation",
-	"video/mp4",
-	"video/webm",
-	"audio/mpeg",
-];
+import { UPLOAD_BATCH_SIZE, uploadProblem } from "@/lib/dms/uploads";
 
 export type DocumentListItem = {
 	id: string;
@@ -69,17 +48,17 @@ export type DocumentListItem = {
 	clientName: string;
 	uploaderName: string | null;
 	uploadedByClient: boolean;
+	folderId: string | null;
 	canDownload: boolean;
 };
 
 /**
- * Documents the actor can see. Staff see everything; clients see public
- * documents, ones shared with them that they've accepted, and client uploads
- * in the companies they belong to.
+ * Documents the actor can see, newest first. `folderId` limits them to one
+ * folder, or to the top level when null.
  */
 export async function listDocuments(
 	actor: Actor,
-	filters: { clientId?: string; query?: string } = {},
+	filters: { clientId?: string; query?: string; folderId?: string | null } = {},
 ): Promise<DocumentListItem[]> {
 	const staff = isStaff(actor);
 
@@ -95,6 +74,7 @@ export async function listDocuments(
 			clientName: client.name,
 			uploaderName: user.name,
 			uploadedByClient: document.uploadedByClient,
+			folderId: document.folderId,
 			shareAccess: documentShare.access,
 		})
 		.from(document)
@@ -110,29 +90,21 @@ export async function listDocuments(
 		)
 		.where(
 			and(
-				eq(document.status, "ready"),
-				isNull(document.deletedAt),
+				visibleDocuments(actor),
 				isUuid(filters.clientId)
 					? eq(document.clientId, filters.clientId)
 					: undefined,
+				filters.folderId === undefined
+					? undefined
+					: filters.folderId === null
+						? isNull(document.folderId)
+						: eq(document.folderId, filters.folderId),
 				filters.query
 					? ilike(document.name, `%${filters.query.replace(/[\\%_]/g, "\\$&")}%`)
 					: undefined,
-				staff
-					? undefined
-					: or(
-							eq(document.visibility, "public"),
-							isNotNull(documentShare.id),
-							actor.clientIds.length > 0
-								? and(
-										eq(document.uploadedByClient, true),
-										inArray(document.clientId, actor.clientIds),
-									)
-								: undefined,
-						),
 			),
 		)
-		.orderBy(desc(document.createdAt));
+		.orderBy(desc(document.createdAt), asc(document.name));
 
 	return rows.map(({ shareAccess, ...row }) => ({
 		...row,
@@ -168,26 +140,37 @@ export async function getDocument(actor: Actor, id: string) {
 	};
 }
 
+export type UploadRequest = {
+	fileName: string;
+	mimeType: string;
+	sizeBytes: number;
+	/** Folders to put the file in, e.g. "Design/Logos". Created if missing. */
+	folderPath?: string;
+	/** A document from an earlier failed attempt, so retries reuse its record. */
+	documentId?: string;
+};
+
+export type UploadTicket =
+	| { ok: true; documentId: string; uploadUrl: string | null }
+	| { ok: false; error: string };
+
 /**
- * Step 1 of an upload: records a pending document and returns a short-lived
- * URL the browser PUTs the file to directly, so files never pass through
- * the Next.js server.
+ * Step 1 of an upload: records pending documents and returns short-lived URLs
+ * the browser PUTs the files to directly, so files never pass through the
+ * Next.js server. Returns one result per file, in order; a null URL means an
+ * earlier attempt already succeeded.
  */
-export async function requestUpload(
+export async function requestUploads(
 	actor: Actor,
 	input: {
 		clientId: string;
-		fileName: string;
-		mimeType: string;
-		sizeBytes: number;
+		/** Folder being uploaded into; null for the client's top level. */
+		folderId?: string | null;
+		files: UploadRequest[];
 	},
-) {
-	const mimeType = input.mimeType || "application/octet-stream";
-	if (!ALLOWED_MIME_TYPES.includes(mimeType)) {
-		throw new DmsError(`Files of type "${mimeType}" can't be uploaded.`);
-	}
-	if (input.sizeBytes <= 0 || input.sizeBytes > MAX_UPLOAD_BYTES) {
-		throw new DmsError("Files must be between 1 byte and 100 MB.");
+): Promise<UploadTicket[]> {
+	if (input.files.length === 0 || input.files.length > UPLOAD_BATCH_SIZE) {
+		throw new DmsError(`Upload between 1 and ${UPLOAD_BATCH_SIZE} files at a time.`);
 	}
 	const owner = isUuid(input.clientId)
 		? await db.query.client.findFirst({ where: eq(client.id, input.clientId) })
@@ -196,94 +179,244 @@ export async function requestUpload(
 	// Clients may only upload into their own companies' folders.
 	if (!canUploadTo(actor, owner.id)) throw new ForbiddenError();
 
-	const id = randomUUID();
-	const name = input.fileName.trim().slice(0, 255) || "Untitled";
-	const storageKey = buildStorageKey(owner.id, id, name);
-
-	await db.insert(document).values({
-		id,
-		clientId: owner.id,
-		name,
-		storageKey,
-		mimeType,
-		sizeBytes: input.sizeBytes,
-		uploadedBy: actor.id,
-		uploadedByClient: actor.role === "client",
-	});
-
-	return { documentId: id, uploadUrl: await getUploadUrl(storageKey, mimeType) };
-}
-
-/** Step 2 of an upload: checks the file reached Spaces, then publishes it. */
-export async function confirmUpload(actor: Actor, id: string) {
-	// Only whoever started the upload can confirm it.
-	const doc = isUuid(id)
-		? await db.query.document.findFirst({
-				where: and(
-					eq(document.id, id),
-					eq(document.status, "pending"),
-					eq(document.uploadedBy, actor.id),
-				),
-				with: { client: true },
-			})
-		: undefined;
-	if (!doc) throw new DmsError("Upload not found.");
-
-	const head = await headObject(doc.storageKey);
-	if (!head) throw new DmsError("The file didn't finish uploading. Try again.");
-	if (head.size !== doc.sizeBytes) {
-		await deleteObject(doc.storageKey);
-		throw new DmsError("The uploaded file was incomplete. Try again.");
+	const parentId = input.folderId ?? null;
+	if (parentId !== null) {
+		const parent = isUuid(parentId)
+			? await db.query.folder.findFirst({
+					where: and(eq(folder.id, parentId), eq(folder.clientId, owner.id)),
+				})
+			: undefined;
+		if (!parent) throw new DmsError("That folder no longer exists.");
 	}
 
-	await db
-		.update(document)
-		.set({ status: "ready" })
-		.where(eq(document.id, id));
-	await logActivity({
-		actorId: actor.id,
-		action: "document.upload",
-		documentId: id,
-		clientId: doc.clientId,
-		metadata: { name: doc.name, sizeBytes: doc.sizeBytes },
+	const retryIds = input.files.map((f) => f.documentId).filter(isUuid);
+	const earlier = new Map(
+		retryIds.length > 0
+			? (
+					await db.query.document.findMany({
+						where: and(
+							inArray(document.id, retryIds),
+							eq(document.uploadedBy, actor.id),
+							eq(document.clientId, owner.id),
+							isNull(document.deletedAt),
+						),
+					})
+				).map((doc) => [doc.id, doc])
+			: [],
+	);
+
+	const problems = input.files.map((file) => uploadProblem(file));
+	const folders = await ensureFolders(
+		actor,
+		owner.id,
+		parentId,
+		input.files.filter((_, i) => !problems[i]).map((f) => f.folderPath ?? ""),
+	);
+
+	const rows: (typeof document.$inferInsert)[] = [];
+	const tickets = input.files.map(async (file, i): Promise<UploadTicket> => {
+		const problem = problems[i];
+		if (problem) return { ok: false, error: problem };
+
+		const name = file.fileName.trim().slice(0, 255) || "Untitled";
+		const previous = file.documentId ? earlier.get(file.documentId) : undefined;
+		if (
+			previous &&
+			previous.sizeBytes === file.sizeBytes &&
+			previous.mimeType === file.mimeType
+		) {
+			return {
+				ok: true,
+				documentId: previous.id,
+				uploadUrl:
+					previous.status === "ready"
+						? null
+						: await getUploadUrl(previous.storageKey, previous.mimeType),
+			};
+		}
+
+		const id = randomUUID();
+		const storageKey = buildStorageKey(owner.id, id, name);
+		rows.push({
+			id,
+			clientId: owner.id,
+			folderId: folders.get(file.folderPath ?? "") ?? null,
+			name,
+			storageKey,
+			mimeType: file.mimeType,
+			sizeBytes: file.sizeBytes,
+			uploadedBy: actor.id,
+			uploadedByClient: actor.role === "client",
+		});
+		return {
+			ok: true,
+			documentId: id,
+			uploadUrl: await getUploadUrl(storageKey, file.mimeType),
+		};
 	});
 
-	if (doc.uploadedByClient) {
-		// Sent after the response, so the uploader isn't kept waiting.
-		after(() =>
-			notifyOwnersOfClientUpload(actor, {
-				id,
-				name: doc.name,
-				clientName: doc.client.name,
-			}),
-		);
-	}
+	const results = await Promise.all(tickets);
+	if (rows.length > 0) await db.insert(document).values(rows);
+	return results;
 }
 
-/** Emails every owner. A failed email never fails the upload itself. */
-async function notifyOwnersOfClientUpload(
+/**
+ * Step 2 of an upload: checks each file reached Spaces, then publishes it.
+ * Returns an error message, or null for success, per document in order.
+ */
+export async function confirmUploads(
 	actor: Actor,
-	doc: { id: string; name: string; clientName: string },
-) {
-	const owners = await db
-		.select({ email: user.email })
-		.from(user)
-		.where(eq(user.role, "owner"));
+	ids: string[],
+): Promise<(string | null)[]> {
+	if (ids.length === 0 || ids.length > UPLOAD_BATCH_SIZE) {
+		throw new DmsError(`Upload between 1 and ${UPLOAD_BATCH_SIZE} files at a time.`);
+	}
+	const validIds = ids.filter(isUuid);
+	// Only whoever started the upload can confirm it.
+	const docs = new Map(
+		validIds.length > 0
+			? (
+					await db.query.document.findMany({
+						where: and(
+							inArray(document.id, validIds),
+							eq(document.uploadedBy, actor.id),
+							isNull(document.deletedAt),
+						),
+					})
+				).map((doc) => [doc.id, doc])
+			: [],
+	);
+	const folderPaths = await folderPathNames(
+		[...docs.values()].map((doc) => doc.folderId),
+	);
 
-	await Promise.all(
-		owners.map((owner) =>
-			sendClientUploadEmail({
-				to: owner.email,
-				uploaderName: actor.name,
-				uploaderEmail: actor.email,
-				clientName: doc.clientName,
-				documentName: doc.name,
-				url: `${process.env.NEXT_PUBLIC_APP_URL}/portal/documents/${doc.id}`,
-			}).catch((error) =>
-				console.error("Client upload notification failed:", error),
+	return Promise.all(
+		ids.map(async (id) => {
+			const doc = docs.get(id);
+			if (!doc) return "Upload not found.";
+			if (doc.status === "ready") return null;
+
+			try {
+				const head = await headObject(doc.storageKey);
+				if (!head) return "The file didn't finish uploading. Try again.";
+				if (head.size !== doc.sizeBytes) {
+					await deleteObject(doc.storageKey);
+					return "The uploaded file was incomplete. Try again.";
+				}
+
+				const published = await db
+					.update(document)
+					.set({ status: "ready", notifyPending: doc.uploadedByClient })
+					.where(and(eq(document.id, id), eq(document.status, "pending")))
+					.returning({ id: document.id });
+				// Another confirm got there first, and has logged it.
+				if (published.length === 0) return null;
+
+				await logActivity({
+					actorId: actor.id,
+					action: "document.upload",
+					documentId: id,
+					clientId: doc.clientId,
+					metadata: {
+						name: doc.name,
+						sizeBytes: doc.sizeBytes,
+						folder: doc.folderId ? folderPaths.get(doc.folderId) : undefined,
+					},
+				});
+				return null;
+			} catch (error) {
+				// One bad file shouldn't fail the rest of the batch.
+				console.error("Confirming upload failed:", error);
+				return "Something went wrong. Please try again.";
+			}
+		}),
+	);
+}
+
+/**
+ * Step 3 of an upload: emails every owner one summary of what a client has
+ * uploaded since the last one. Safe to call more than once, and picks up
+ * anything left over from an upload that was interrupted.
+ */
+export async function finishUploads(actor: Actor) {
+	if (actor.role !== "client") return;
+	// Claims the documents, so overlapping calls never email about them twice.
+	const docs = await db
+		.update(document)
+		.set({ notifyPending: false })
+		.where(
+			and(
+				eq(document.uploadedBy, actor.id),
+				eq(document.notifyPending, true),
+				isNull(document.deletedAt),
 			),
+		)
+		.returning({
+			id: document.id,
+			name: document.name,
+			clientId: document.clientId,
+			folderId: document.folderId,
+		});
+	if (docs.length === 0) return;
+
+	// Sent after the response, so the uploader isn't kept waiting.
+	after(() =>
+		notifyOwnersOfClientUpload(actor, docs).catch((error) =>
+			console.error("Client upload notification failed:", error),
 		),
 	);
+}
+
+/** Emails every owner, once per company. A failed email never fails the upload. */
+async function notifyOwnersOfClientUpload(
+	actor: Actor,
+	docs: {
+		id: string;
+		name: string;
+		clientId: string;
+		folderId: string | null;
+	}[],
+) {
+	const [owners, companies, folderPaths] = await Promise.all([
+		db.select({ email: user.email }).from(user).where(eq(user.role, "owner")),
+		db
+			.select({ id: client.id, name: client.name })
+			.from(client)
+			.where(
+				inArray(
+					client.id,
+					docs.map((doc) => doc.clientId),
+				),
+			),
+		folderPathNames(docs.map((doc) => doc.folderId)),
+	]);
+
+	for (const company of companies) {
+		const uploaded = docs.filter((doc) => doc.clientId === company.id);
+		const names = uploaded.map((doc) => {
+			const path = doc.folderId ? folderPaths.get(doc.folderId) : undefined;
+			return path ? `${path}/${doc.name}` : doc.name;
+		});
+		const path =
+			uploaded.length === 1
+				? `/portal/documents/${uploaded[0].id}`
+				: `/portal?client=${company.id}`;
+
+		await Promise.all(
+			owners.map((owner) =>
+				sendClientUploadEmail({
+					to: owner.email,
+					uploaderName: actor.name,
+					uploaderEmail: actor.email,
+					clientName: company.name,
+					documentNames: names.sort((a, b) => a.localeCompare(b)),
+					url: `${process.env.NEXT_PUBLIC_APP_URL}${path}`,
+				}).catch((error) =>
+					console.error("Client upload notification failed:", error),
+				),
+			),
+		);
+	}
 }
 
 /** A short-lived link to preview (inline) or download (attachment) a file. */
