@@ -8,6 +8,7 @@ import { Badge, FileIcon } from "@/components/portal/ui";
 import { listActivity } from "@/lib/dms/activity";
 import { getDocument, listShares } from "@/lib/dms/documents";
 import { DmsError } from "@/lib/dms/errors";
+import { folderPath, listFolders } from "@/lib/dms/folders";
 import {
 	ACTION_LABELS,
 	describeActivity,
@@ -31,12 +32,15 @@ export default async function DocumentPage({
 		throw error;
 	});
 
-	const [shares, activity] = await Promise.all([
+	const [shares, activity, folders] = await Promise.all([
 		can(actor, "canShare") ? listShares(actor, id) : null,
 		can(actor, "canViewActivity")
 			? listActivity(actor, { documentId: id }).then((r) => r.rows.slice(0, 10))
 			: null,
+		doc.folderId ? listFolders(actor, doc.clientId) : null,
 	]);
+	const path = folders ? folderPath(folders, doc.folderId) : [];
+	const parent = path.at(-1);
 
 	const fileUrl = `/portal/documents/${doc.id}/file`;
 	const kind = previewKind(doc.mimeType);
@@ -44,10 +48,11 @@ export default async function DocumentPage({
 	return (
 		<>
 			<Link
-				href="/portal"
+				href={parent ? `/portal?folder=${parent.id}` : "/portal"}
 				className="mb-4 inline-flex items-center gap-1.5 text-sm text-white/60 hover:text-white"
 			>
-				<ArrowLeft className="size-4" aria-hidden /> All documents
+				<ArrowLeft className="size-4" aria-hidden />{" "}
+				{parent ? path.map((f) => f.name).join(" / ") : "All documents"}
 			</Link>
 
 			<div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -138,6 +143,7 @@ export default async function DocumentPage({
 						canRename={doc.canRename}
 						canChangeVisibility={can(actor, "canShare")}
 						canDelete={doc.canDelete}
+						folderId={doc.folderId}
 					/>
 
 					{shares ? <SharePanel documentId={doc.id} shares={shares} /> : null}

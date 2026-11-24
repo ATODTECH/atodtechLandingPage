@@ -38,18 +38,23 @@ async function run<T>(fn: () => Promise<T>): Promise<ActionResult<T>> {
 
 // Documents
 
-export async function requestUploadAction(input: {
-	clientId: string;
-	fileName: string;
-	mimeType: string;
-	sizeBytes: number;
-}) {
-	return run(async () => documents.requestUpload(await requireActor(), input));
+export async function requestUploadsAction(
+	input: Parameters<typeof documents.requestUploads>[1],
+) {
+	return run(async () => documents.requestUploads(await requireActor(), input));
 }
 
-export async function confirmUploadAction(documentId: string) {
+// Doesn't revalidate: a big folder confirms many batches, and re-rendering the
+// list after each would only slow the upload down.
+export async function confirmUploadsAction(documentIds: string[]) {
+	return run(async () =>
+		documents.confirmUploads(await requireActor(), documentIds),
+	);
+}
+
+export async function finishUploadsAction() {
 	return run(async () => {
-		await documents.confirmUpload(await requireActor(), documentId);
+		await documents.finishUploads(await requireActor());
 		revalidatePath("/portal");
 	});
 }

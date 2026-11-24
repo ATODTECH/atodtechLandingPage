@@ -43,7 +43,8 @@ function assertInPrefix(key: string) {
 export async function getUploadUrl(
 	key: string,
 	contentType: string,
-	expiresIn = 300,
+	// URLs are issued in batches, so the last file may wait a while.
+	expiresIn = 30 * 60,
 ) {
 	assertInPrefix(key);
 	return getSignedUrl(

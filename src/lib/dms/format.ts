@@ -95,6 +95,8 @@ export function describeActivity(
 	const m = metadata ?? {};
 	const str = (key: string) => (typeof m[key] === "string" ? (m[key] as string) : "");
 	switch (action) {
+		case "document.upload":
+			return str("folder") ? `${str("folder")}/${str("name")}` : str("name");
 		case "document.rename":
 		case "client.update":
 			return `${str("from")} → ${str("to")}`;

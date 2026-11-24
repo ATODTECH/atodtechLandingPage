@@ -1,5 +1,6 @@
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
+	type AnyPgColumn,
 	bigint,
 	boolean,
 	index,
@@ -95,6 +96,42 @@ export const clientMember = pgTable(
 	],
 );
 
+/**
+ * A folder inside a client's documents. Folders only organise: access is still
+ * decided per document, and a folder shows up only for people who can see
+ * something in it.
+ */
+export const folder = pgTable(
+	"folder",
+	{
+		id: uuid("id").primaryKey().defaultRandom(),
+		clientId: uuid("client_id")
+			.notNull()
+			.references(() => client.id, { onDelete: "cascade" }),
+		// Null for folders at the top level of a client.
+		parentId: uuid("parent_id").references((): AnyPgColumn => folder.id, {
+			onDelete: "cascade",
+		}),
+		name: text("name").notNull(),
+		createdBy: text("created_by").references(() => user.id, {
+			onDelete: "set null",
+		}),
+		createdAt: timestamp("created_at").defaultNow().notNull(),
+		updatedAt: timestamp("updated_at")
+			.defaultNow()
+			.$onUpdate(() => new Date())
+			.notNull(),
+	},
+	(table) => [
+		uniqueIndex("folder_parent_name_idx").on(table.parentId, table.name),
+		// Nulls never conflict, so top-level names need their own index.
+		uniqueIndex("folder_client_root_name_idx")
+			.on(table.clientId, table.name)
+			.where(sql`${table.parentId} is null`),
+		index("folder_client_id_idx").on(table.clientId),
+	],
+);
+
 export const document = pgTable(
 	"document",
 	{
@@ -102,6 +139,10 @@ export const document = pgTable(
 		clientId: uuid("client_id")
 			.notNull()
 			.references(() => client.id, { onDelete: "restrict" }),
+		// Null for documents at the top level of a client.
+		folderId: uuid("folder_id").references(() => folder.id, {
+			onDelete: "set null",
+		}),
 		name: text("name").notNull(),
 		storageKey: text("storage_key").notNull().unique(),
 		mimeType: text("mime_type").notNull(),
@@ -114,6 +155,9 @@ export const document = pgTable(
 		// Uploaded by a client user (not staff). Visible to everyone at that
 		// client company, unlike staff uploads, which need sharing.
 		uploadedByClient: boolean("uploaded_by_client").default(false).notNull(),
+		// A finished client upload the owners haven't been emailed about yet.
+		// Cleared when it's included in a summary email.
+		notifyPending: boolean("notify_pending").default(false).notNull(),
 		createdAt: timestamp("created_at").defaultNow().notNull(),
 		updatedAt: timestamp("updated_at")
 			.defaultNow()
@@ -125,6 +169,7 @@ export const document = pgTable(
 	},
 	(table) => [
 		index("document_client_id_idx").on(table.clientId),
+		index("document_folder_id_idx").on(table.folderId),
 		index("document_visibility_idx").on(table.visibility),
 	],
 );
@@ -259,8 +304,14 @@ export const clientMemberRelations = relations(clientMember, ({ one }) => ({
 	}),
 }));
 
+export const folderRelations = relations(folder, ({ one, many }) => ({
+	client: one(client, { fields: [folder.clientId], references: [client.id] }),
+	documents: many(document),
+}));
+
 export const documentRelations = relations(document, ({ one, many }) => ({
 	client: one(client, { fields: [document.clientId], references: [client.id] }),
+	folder: one(folder, { fields: [document.folderId], references: [folder.id] }),
 	uploader: one(user, { fields: [document.uploadedBy], references: [user.id] }),
 	shares: many(documentShare),
 }));
