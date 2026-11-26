@@ -112,7 +112,8 @@ export async function listDocuments(
 			staff ||
 			row.visibility === "public" ||
 			shareAccess === "download" ||
-			(row.uploadedByClient && actor.clientIds.includes(row.clientId)),
+			(row.uploadedByClient && actor.clientIds.includes(row.clientId)) ||
+			(row.folderId !== null && actor.folderAccess[row.folderId] === "download"),
 	}));
 }
 

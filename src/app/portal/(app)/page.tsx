@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { Building2, ChevronRight, Download, Folder, Globe, Lock } from "lucide-react";
 
 import { DocumentFilters } from "@/components/portal/document-filters";
+import { FolderActions } from "@/components/portal/folder-actions";
 import {
 	Badge,
 	EmptyState,
@@ -12,7 +13,7 @@ import {
 import { UploadDialog } from "@/components/portal/upload-dialog";
 import { listClients } from "@/lib/dms/clients";
 import { listDocuments } from "@/lib/dms/documents";
-import { folderPath, listFolders } from "@/lib/dms/folders";
+import { folderPath, listFolderShares, listFolders } from "@/lib/dms/folders";
 import { formatBytes, formatDate } from "@/lib/dms/format";
 import { can, canUploadTo, isStaff } from "@/lib/dms/permissions";
 import { requireActor } from "@/lib/dms/session";
@@ -38,11 +39,16 @@ export default async function DocumentsPage({
 
 	const clientId = openFolder?.clientId ?? clientParam;
 	// A search covers every folder; otherwise show one level at a time.
-	const documents = await listDocuments(actor, {
-		clientId,
-		query,
-		folderId: query ? undefined : openFolder?.id ?? null,
-	});
+	const [documents, folderShares] = await Promise.all([
+		listDocuments(actor, {
+			clientId,
+			query,
+			folderId: query ? undefined : openFolder?.id ?? null,
+		}),
+		openFolder && can(actor, "canShare")
+			? listFolderShares(actor, openFolder.id)
+			: null,
+	]);
 	const folders = query
 		? []
 		: [...allFolders.values()].filter(
@@ -67,6 +73,14 @@ export default async function DocumentsPage({
 							: "Documents shared with you and public documents."
 				}
 			>
+				{openFolder ? (
+					<FolderActions
+						folderId={openFolder.id}
+						name={openFolder.name}
+						canDownload={openFolder.downloadableCount > 0}
+						shares={folderShares}
+					/>
+				) : null}
 				{canUpload ? (
 					<UploadDialog
 						// Start fresh when moving to another folder or client.
@@ -173,8 +187,21 @@ export default async function DocumentsPage({
 									<td className="hidden px-4 py-3 whitespace-nowrap text-white/70 sm:table-cell">
 										{f.documentCount === 1 ? "1 file" : `${f.documentCount} files`}
 									</td>
-									<td className="hidden lg:table-cell" />
-									<td />
+									<td className="hidden px-4 py-3 whitespace-nowrap text-white/70 lg:table-cell">
+										{formatDate(f.createdAt)}
+									</td>
+									<td className="px-4 py-3 text-right">
+										{f.downloadableCount > 0 ? (
+											<a
+												href={`/portal/folders/${f.id}/download`}
+												className="inline-flex size-8 items-center justify-center rounded-lg text-white/60 hover:bg-white/10 hover:text-white"
+												aria-label={`Download ${f.name} as a zip`}
+												title="Download as zip"
+											>
+												<Download className="size-4" aria-hidden />
+											</a>
+										) : null}
+									</td>
 								</tr>
 							))}
 							{documents.map((doc) => (

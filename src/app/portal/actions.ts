@@ -10,6 +10,7 @@ import { logActivity } from "@/lib/dms/activity";
 import * as clients from "@/lib/dms/clients";
 import * as documents from "@/lib/dms/documents";
 import { DmsError } from "@/lib/dms/errors";
+import * as folders from "@/lib/dms/folders";
 import * as invites from "@/lib/dms/invites";
 import { getActor, requireActor } from "@/lib/dms/session";
 import * as team from "@/lib/dms/team";
@@ -97,6 +98,23 @@ export async function revokeShareAction(shareId: string, documentId: string) {
 	return run(async () => {
 		await documents.revokeShare(await requireActor(), shareId);
 		revalidatePath(`/portal/documents/${documentId}`);
+	});
+}
+
+export async function shareFolderAction(
+	folderId: string,
+	input: { email: string; access: "view" | "download" },
+) {
+	return run(async () => {
+		await folders.shareFolder(await requireActor(), folderId, input);
+		revalidatePath("/portal");
+	});
+}
+
+export async function revokeFolderShareAction(shareId: string) {
+	return run(async () => {
+		await folders.revokeFolderShare(await requireActor(), shareId);
+		revalidatePath("/portal");
 	});
 }
 
@@ -233,7 +251,9 @@ export async function acceptInviteAction(
 	redirect(
 		result.data.kind === "share"
 			? `/portal/documents/${result.data.documentId}`
-			: "/portal",
+			: result.data.kind === "folder"
+				? `/portal?folder=${result.data.folderId}`
+				: "/portal",
 	);
 }
 

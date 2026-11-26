@@ -97,8 +97,8 @@ export const clientMember = pgTable(
 );
 
 /**
- * A folder inside a client's documents. Folders only organise: access is still
- * decided per document, and a folder shows up only for people who can see
+ * A folder inside a client's documents. Access comes from the documents in it
+ * or from a folderShare, and a folder shows up only for people who can see
  * something in it.
  */
 export const folder = pgTable(
@@ -208,6 +208,40 @@ export const documentShare = pgTable(
 	],
 );
 
+/**
+ * Shares a whole folder: the person gets access to every document in it and
+ * in its subfolders, including ones added after the share. Works like
+ * documentShare otherwise (email invite, accepted on opening the link).
+ */
+export const folderShare = pgTable(
+	"folder_share",
+	{
+		id: uuid("id").primaryKey().defaultRandom(),
+		folderId: uuid("folder_id")
+			.notNull()
+			.references(() => folder.id, { onDelete: "cascade" }),
+		email: text("email").notNull(),
+		userId: text("user_id").references(() => user.id, { onDelete: "cascade" }),
+		access: shareAccess("access").default("view").notNull(),
+		status: shareStatus("status").default("pending").notNull(),
+		tokenHash: text("token_hash").notNull().unique(),
+		invitedBy: text("invited_by").references(() => user.id, {
+			onDelete: "set null",
+		}),
+		expiresAt: timestamp("expires_at").notNull(),
+		acceptedAt: timestamp("accepted_at"),
+		createdAt: timestamp("created_at").defaultNow().notNull(),
+		updatedAt: timestamp("updated_at")
+			.defaultNow()
+			.$onUpdate(() => new Date())
+			.notNull(),
+	},
+	(table) => [
+		uniqueIndex("folder_share_folder_email_idx").on(table.folderId, table.email),
+		index("folder_share_user_id_idx").on(table.userId),
+	],
+);
+
 /** Per-admin rights, set by the owner. The owner always has every right. */
 export const adminPermission = pgTable("admin_permission", {
 	userId: text("user_id")
@@ -307,6 +341,12 @@ export const clientMemberRelations = relations(clientMember, ({ one }) => ({
 export const folderRelations = relations(folder, ({ one, many }) => ({
 	client: one(client, { fields: [folder.clientId], references: [client.id] }),
 	documents: many(document),
+	shares: many(folderShare),
+}));
+
+export const folderShareRelations = relations(folderShare, ({ one }) => ({
+	folder: one(folder, { fields: [folderShare.folderId], references: [folder.id] }),
+	user: one(user, { fields: [folderShare.userId], references: [user.id] }),
 }));
 
 export const documentRelations = relations(document, ({ one, many }) => ({

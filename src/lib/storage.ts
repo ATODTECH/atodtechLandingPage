@@ -78,6 +78,14 @@ export async function getDownloadUrl(
 	);
 }
 
+/** The object's contents as a stream, for passing a file through the server. */
+export async function getObjectStream(key: string) {
+	assertInPrefix(key);
+	const object = await s3.send(new GetObjectCommand({ Bucket: BUCKET, Key: key }));
+	if (!object.Body) throw new Error(`Empty object: ${key}`);
+	return object.Body.transformToWebStream();
+}
+
 export async function deleteObject(key: string) {
 	assertInPrefix(key);
 	await s3.send(new DeleteObjectCommand({ Bucket: BUCKET, Key: key }));

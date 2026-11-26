@@ -57,6 +57,13 @@
       "when": 1795511507201,
       "tag": "0007_folders",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1795729259118,
+      "tag": "0008_folder_shares",
+      "breakpoints": true
     }
   ]
 }

@@ -6,6 +6,7 @@ import {
 	client,
 	clientMember,
 	documentShare,
+	folderShare,
 	user,
 	userInvite,
 	type AdminRights,
@@ -185,6 +186,7 @@ export async function removeUser(actor: Actor, userId: string) {
 		await tx
 			.delete(documentShare)
 			.where(eq(documentShare.email, target.email));
+		await tx.delete(folderShare).where(eq(folderShare.email, target.email));
 		// Cascades to sessions (signing them out), accounts and admin rights.
 		await tx.delete(user).where(eq(user.id, userId));
 	});

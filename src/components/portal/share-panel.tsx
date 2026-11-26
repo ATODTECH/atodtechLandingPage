@@ -4,7 +4,12 @@ import { useState } from "react";
 import { X } from "lucide-react";
 import { toast } from "sonner";
 
-import { revokeShareAction, shareDocumentAction } from "@/app/portal/actions";
+import {
+	revokeFolderShareAction,
+	revokeShareAction,
+	shareDocumentAction,
+	shareFolderAction,
+} from "@/app/portal/actions";
 import { FormField } from "@/components/form/form-field";
 import { LoadingButton } from "@/components/form/loading-button";
 import { SelectField } from "@/components/form/select-field";
@@ -25,11 +30,17 @@ export type ShareRow = {
 
 export function SharePanel({
 	documentId,
+	folderId,
 	shares,
+	bare = false,
 }: {
-	documentId: string;
 	shares: ShareRow[];
-}) {
+	/** Without the bordered box and heading, e.g. inside a dialog. */
+	bare?: boolean;
+} & (
+	| { documentId: string; folderId?: never }
+	| { folderId: string; documentId?: never }
+)) {
 	const [sending, setSending] = useState(false);
 	const [revoking, setRevoking] = useState<string | null>(null);
 	const visible = shares.filter((s) => s.status !== "revoked");
@@ -39,10 +50,13 @@ export function SharePanel({
 		const form = event.currentTarget;
 		const data = new FormData(form);
 		setSending(true);
-		const result = await shareDocumentAction(documentId, {
+		const input = {
 			email: String(data.get("email")),
-			access: data.get("access") === "download" ? "download" : "view",
-		});
+			access: data.get("access") === "download" ? ("download" as const) : ("view" as const),
+		};
+		const result = folderId
+			? await shareFolderAction(folderId, input)
+			: await shareDocumentAction(documentId!, input);
 		setSending(false);
 		if (!result.ok) return toast.error(result.error);
 		form.reset();
@@ -51,20 +65,27 @@ export function SharePanel({
 
 	async function revoke(shareId: string) {
 		setRevoking(shareId);
-		const result = await revokeShareAction(shareId, documentId);
+		const result = folderId
+			? await revokeFolderShareAction(shareId)
+			: await revokeShareAction(shareId, documentId!);
 		setRevoking(null);
 		if (!result.ok) toast.error(result.error);
 	}
 
+	const prefix = folderId ? "folder-share" : "share";
 	return (
-		<section className="rounded-lg border border-white/10 p-4">
-			<h2 className="font-medium">Share</h2>
-			<p className="mt-1 text-xs text-white/50">
-				They&rsquo;ll get an email and can see the document once they accept.
-			</p>
-			<form onSubmit={share} className="mt-4 flex flex-col gap-3">
+		<section className={bare ? undefined : "rounded-lg border border-white/10 p-4"}>
+			{bare ? null : (
+				<>
+					<h2 className="font-medium">Share</h2>
+					<p className="mt-1 text-xs text-white/50">
+						They&rsquo;ll get an email and can see the document once they accept.
+					</p>
+				</>
+			)}
+			<form onSubmit={share} className={`${bare ? "" : "mt-4 "}flex flex-col gap-3`}>
 				<FormField
-					id="share-email"
+					id={`${prefix}-email`}
 					name="email"
 					label="Email"
 					type="email"
@@ -72,7 +93,7 @@ export function SharePanel({
 					placeholder="name@company.com"
 				/>
 				<SelectField
-					id="share-access"
+					id={`${prefix}-access`}
 					name="access"
 					label="Access"
 					options={ACCESS_OPTIONS}

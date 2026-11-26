@@ -40,6 +40,15 @@ async function roleForNewUser(rawEmail: string): Promise<UserRole | null> {
 	});
 	if (share) return "client";
 
+	const folderInvite = await db.query.folderShare.findFirst({
+		where: and(
+			eq(schema.folderShare.email, email),
+			eq(schema.folderShare.status, "pending"),
+			gt(schema.folderShare.expiresAt, now),
+		),
+	});
+	if (folderInvite) return "client";
+
 	return null;
 }
 

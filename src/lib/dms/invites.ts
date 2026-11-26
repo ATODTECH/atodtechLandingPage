@@ -8,6 +8,7 @@ import {
 	client,
 	clientMember,
 	documentShare,
+	folderShare,
 	user,
 	userInvite,
 	type AdminRights,
@@ -127,6 +128,13 @@ export type ResolvedInvite =
 			id: string;
 			documentId: string;
 			documentName: string;
+	  }
+	| {
+			kind: "folder";
+			email: string;
+			id: string;
+			folderId: string;
+			folderName: string;
 	  };
 
 /** Looks up an open, unexpired invite by its raw token. */
@@ -167,6 +175,24 @@ export async function resolveInvite(
 			id: share.id,
 			documentId: share.documentId,
 			documentName: share.document.name,
+		};
+	}
+
+	const folderInvite = await db.query.folderShare.findFirst({
+		where: and(
+			eq(folderShare.tokenHash, tokenHash),
+			eq(folderShare.status, "pending"),
+			gt(folderShare.expiresAt, now),
+		),
+		with: { folder: true },
+	});
+	if (folderInvite) {
+		return {
+			kind: "folder",
+			email: folderInvite.email,
+			id: folderInvite.id,
+			folderId: folderInvite.folderId,
+			folderName: folderInvite.folder.name,
 		};
 	}
 
@@ -274,6 +300,16 @@ async function markAccepted(invite: ResolvedInvite, userId: string) {
 					gt(documentShare.expiresAt, acceptedAt),
 				),
 			);
+		await tx
+			.update(folderShare)
+			.set({ status: "accepted", userId, acceptedAt })
+			.where(
+				and(
+					eq(folderShare.email, invite.email),
+					eq(folderShare.status, "pending"),
+					gt(folderShare.expiresAt, acceptedAt),
+				),
+			);
 	});
 
 	if (invite.kind === "share") {
@@ -282,6 +318,18 @@ async function markAccepted(invite: ResolvedInvite, userId: string) {
 			action: "share.accept",
 			documentId: invite.documentId,
 			metadata: { email: invite.email, documentName: invite.documentName },
+		});
+	}
+	if (invite.kind === "folder") {
+		await logActivity({
+			actorId: userId,
+			action: "share.accept",
+			metadata: {
+				email: invite.email,
+				name: invite.folderName,
+				kind: "folder",
+				folderId: invite.folderId,
+			},
 		});
 	}
 }

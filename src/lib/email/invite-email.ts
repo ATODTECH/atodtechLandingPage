@@ -11,7 +11,11 @@ type InviteEmail = {
 	/** Replies go to the person who sent the invite, not a no-reply inbox. */
 	inviterEmail?: string;
 	url: string;
-} & ({ kind: "admin" | "account" } | { kind: "share"; documentName: string });
+} & (
+	| { kind: "admin" | "account" }
+	| { kind: "share"; documentName: string }
+	| { kind: "folder"; folderName: string }
+);
 
 function inviteContent(email: InviteEmail): ActionEmail {
 	const note = `This link expires in 7 days and only works for ${email.to}.`;
@@ -47,6 +51,16 @@ function inviteContent(email: InviteEmail): ActionEmail {
 				bodyHtml: `${escapeHtml(email.inviterName)} shared <strong style="color:${EMAIL_COLORS.white};">${escapeHtml(email.documentName)}</strong> with you on the Atod Tech portal.`,
 				bodyText: `${email.inviterName} shared "${email.documentName}" with you on the Atod Tech portal.`,
 				ctaLabel: "Open document",
+				url: email.url,
+				note,
+			};
+		case "folder":
+			return {
+				subject: `${email.inviterName} shared the folder "${email.folderName}" with you`,
+				heading: "A folder was shared with you",
+				bodyHtml: `${escapeHtml(email.inviterName)} shared the folder <strong style="color:${EMAIL_COLORS.white};">${escapeHtml(email.folderName)}</strong> with you on the Atod Tech portal. You'll see everything in it, including files added later.`,
+				bodyText: `${email.inviterName} shared the folder "${email.folderName}" with you on the Atod Tech portal. You'll see everything in it, including files added later.`,
+				ctaLabel: "Open folder",
 				url: email.url,
 				note,
 			};
