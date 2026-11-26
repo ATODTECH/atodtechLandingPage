@@ -66,13 +66,18 @@ type ActivityEntry = Omit<
 
 /** Records an audit entry, capturing the request's IP and user agent. */
 export async function logActivity(entry: ActivityEntry) {
+	await logActivities([entry]);
+}
+
+/** Records several audit entries at once, e.g. one per file in a folder download. */
+export async function logActivities(entries: ActivityEntry[]) {
+	if (entries.length === 0) return;
 	const h = await headers();
 	const ipAddress =
 		h.get("x-forwarded-for")?.split(",")[0]?.trim() ?? h.get("x-real-ip");
+	const userAgent = h.get("user-agent");
 
-	await db.insert(activityLog).values({
-		...entry,
-		ipAddress,
-		userAgent: h.get("user-agent"),
-	});
+	await db
+		.insert(activityLog)
+		.values(entries.map((entry) => ({ ...entry, ipAddress, userAgent })));
 }

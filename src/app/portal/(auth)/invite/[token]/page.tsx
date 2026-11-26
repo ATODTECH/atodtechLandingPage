@@ -34,10 +34,17 @@ export default async function InvitePage({
 	const heading =
 		invite.kind === "share"
 			? `"${invite.documentName}" was shared with you`
-			: invite.role === "admin"
+			: invite.kind === "folder"
+				? `The folder "${invite.folderName}" was shared with you`
+				: invite.role === "admin"
 				? "You've been invited as an admin"
 				: "You've been invited to Atod Tech documents";
-	const cta = invite.kind === "share" ? "Open document" : "Accept invite";
+	const cta =
+		invite.kind === "share"
+			? "Open document"
+			: invite.kind === "folder"
+				? "Open folder"
+				: "Accept invite";
 
 	// Signed in as someone else.
 	if (actor && actor.email.toLowerCase() !== invite.email) {

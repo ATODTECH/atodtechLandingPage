@@ -103,9 +103,15 @@ export function describeActivity(
 		case "document.visibility_change":
 			return `${str("name")}: ${str("from")} → ${str("to")}`;
 		case "share.invite":
-			return `${str("name")} with ${str("email")} (${str("access")})`;
+			return `${folderLabel(m)}${str("name")} with ${str("email")} (${str("access")})`;
 		case "share.revoke":
-			return `${str("name")} from ${str("email")}`;
+			return `${folderLabel(m)}${str("name")} from ${str("email")}`;
+		case "share.accept":
+			return `${folderLabel(m)}${str("name") || str("documentName")}`;
+		case "document.download":
+			return str("viaFolder")
+				? `${str("name")} (in folder ${str("viaFolder")})`
+				: str("name");
 		case "user.invite":
 			return `${str("email")} as ${str("role")}`;
 		case "user.invite_revoke":
@@ -124,6 +130,10 @@ export function describeActivity(
 		default:
 			return str("name") || str("documentName") || str("email");
 	}
+}
+
+function folderLabel(metadata: Record<string, unknown>) {
+	return metadata.kind === "folder" ? "Folder " : "";
 }
 
 const UUID_RE =
